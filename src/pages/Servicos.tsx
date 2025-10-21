@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { DataTable } from "@/components/shared/DataTable";
@@ -46,10 +46,32 @@ export default function Servicos() {
 
   const canEdit = isAdmin;
 
+  // Gerar título automaticamente baseado na categoria selecionada
+  useEffect(() => {
+    if (!editingServico && formData.maquina_id) {
+      const categoriaSelecionada = categorias.find(c => c.id === formData.maquina_id);
+      if (categoriaSelecionada) {
+        const tituloGerado = `Aluguel ${categoriaSelecionada.nome_maquina}`;
+        setFormData(prev => ({ ...prev, titulo_servico: tituloGerado }));
+      }
+    }
+  }, [formData.maquina_id, categorias, editingServico]);
+
   const handleCreate = () => {
     if (!canEdit) return;
     setEditingServico(null);
-    setFormData({});
+    
+    // Pré-preencher campos com valores padrão
+    const dataAtual = new Date().toISOString().split('T')[0];
+    setFormData({
+      valor: 0,
+      status: "pendente",
+      status_cobranca: "a_receber",
+      forma_pagamento: "a_receber",
+      data_inicio: dataAtual,
+      data_fim: dataAtual,
+    });
+    
     setIsDialogOpen(true);
   };
 
@@ -76,25 +98,36 @@ export default function Servicos() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.titulo_servico || !formData.cliente_id || !formData.maquina_id || !formData.valor || !formData.data_inicio || !formData.data_fim) {
-      toast.error("Preencha todos os campos obrigatórios");
+    // Validar apenas campos essenciais
+    if (!formData.cliente_id || !formData.maquina_id || !formData.data_inicio || !formData.data_fim) {
+      toast.error("Preencha todos os campos obrigatórios (Cliente, Máquina, Datas)");
       return;
     }
 
+    // Gerar título se não foi preenchido
+    let titulo = formData.titulo_servico;
+    if (!titulo && formData.maquina_id) {
+      const categoriaSelecionada = categorias.find(c => c.id === formData.maquina_id);
+      titulo = categoriaSelecionada ? `Aluguel ${categoriaSelecionada.nome_maquina}` : "Serviço";
+    }
+
     if (editingServico) {
-      updateServico(editingServico.id, formData);
+      updateServico(editingServico.id, {
+        ...formData,
+        titulo_servico: titulo || formData.titulo_servico
+      });
     } else {
       await addServico({
         cliente_id: formData.cliente_id!,
         maquina_id: formData.maquina_id!,
-        titulo_servico: formData.titulo_servico!,
+        titulo_servico: titulo || "Serviço",
         descricao: formData.descricao || "",
-        valor: formData.valor!,
+        valor: formData.valor ?? 0,
         status: formData.status || "pendente",
         status_cobranca: formData.status_cobranca || "a_receber",
         forma_pagamento: formData.forma_pagamento || "a_receber",
-        data_inicio: formData.data_inicio || new Date().toISOString().split('T')[0],
-        data_fim: formData.data_fim || new Date().toISOString().split('T')[0],
+        data_inicio: formData.data_inicio!,
+        data_fim: formData.data_fim!,
         observacoes: formData.observacoes || ""
       });
     }
@@ -285,13 +318,13 @@ export default function Servicos() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="titulo_servico">Título do Serviço *</Label>
+              <Label htmlFor="titulo_servico">Título do Serviço</Label>
               <Input
                 id="titulo_servico"
-                placeholder="Ex: Aluguel betoneira - Obra Zona Sul"
+                placeholder="Gerado automaticamente baseado na máquina"
                 value={formData.titulo_servico || ""}
                 onChange={(e) => setFormData({ ...formData, titulo_servico: e.target.value })}
-                required
+                disabled={!formData.maquina_id}
               />
             </div>
 
@@ -308,21 +341,20 @@ export default function Servicos() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="valor">Valor *</Label>
+                <Label htmlFor="valor">Valor</Label>
                 <Input
                   id="valor"
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="0"
-                  value={formData.valor || ""}
-                  onChange={(e) => setFormData({ ...formData, valor: parseFloat(e.target.value) })}
-                  required
+                  placeholder="0.00"
+                  value={formData.valor ?? ""}
+                  onChange={(e) => setFormData({ ...formData, valor: parseFloat(e.target.value) || 0 })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status">Status (Padrão: Pendente)</Label>
                 <Select
                   value={formData.status}
                   onValueChange={(value: any) => setFormData({ ...formData, status: value })}
@@ -341,7 +373,7 @@ export default function Servicos() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="status_cobranca">Status Cobrança</Label>
+                <Label htmlFor="status_cobranca">Status Cobrança (Padrão: A Receber)</Label>
                 <Select
                   value={formData.status_cobranca}
                   onValueChange={(value: any) => setFormData({ ...formData, status_cobranca: value })}
@@ -357,7 +389,7 @@ export default function Servicos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
+                <Label htmlFor="forma_pagamento">Forma de Pagamento (Padrão: A Receber)</Label>
                 <Select
                   value={formData.forma_pagamento}
                   onValueChange={(value: any) => setFormData({ ...formData, forma_pagamento: value })}
@@ -378,7 +410,7 @@ export default function Servicos() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="data_inicio">Data Início *</Label>
+                <Label htmlFor="data_inicio">Data Início (Padrão: Hoje) *</Label>
                 <Input
                   id="data_inicio"
                   type="date"
@@ -389,7 +421,7 @@ export default function Servicos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="data_fim">Data Fim *</Label>
+                <Label htmlFor="data_fim">Data Fim (Padrão: Hoje) *</Label>
                 <Input
                   id="data_fim"
                   type="date"
