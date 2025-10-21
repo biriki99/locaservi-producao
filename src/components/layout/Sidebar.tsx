@@ -22,10 +22,10 @@ const navigation = [
 ];
 
 export const Sidebar = () => {
-  const { user } = useAuth();
+  const { userRole } = useAuth();
 
   const visibleNavigation = navigation.filter(item => 
-    item.roles.includes(user?.role || "nenhum")
+    item.roles.includes(userRole || "nenhum")
   );
 
   return (
@@ -58,9 +58,9 @@ export const Sidebar = () => {
       </nav>
       
       <div className="border-t p-4">
-        <div className="rounded-lg bg-muted p-3">
-          <p className="text-xs text-muted-foreground">
-            Modo Mock - Dados de demonstração
+        <div className="rounded-lg bg-primary/10 p-3">
+          <p className="text-xs text-primary">
+            CRM conectado ao Supabase
           </p>
         </div>
       </div>

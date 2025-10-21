@@ -3,13 +3,21 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Clock } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Pendente() {
-  const { logout, user } = useAuth();
+  const { signOut, userName, userRole } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  useEffect(() => {
+    // Se o usuário não está com role "nenhum", redirecionar para dashboard
+    if (userRole && userRole !== 'nenhum') {
+      navigate("/dashboard");
+    }
+  }, [userRole, navigate]);
+
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
   };
 
@@ -23,7 +31,7 @@ export default function Pendente() {
         <h1 className="mb-2 text-2xl font-bold">Conta Pendente de Aprovação</h1>
         
         <p className="mb-6 text-muted-foreground">
-          Olá, <span className="font-medium">{user?.nome}</span>! Sua conta ainda está em processo de aprovação.
+          Olá, <span className="font-medium">{userName}</span>! Sua conta ainda está em processo de aprovação.
           <br /><br />
           Um administrador irá revisar seu cadastro em breve. Você receberá um email quando sua conta for ativada.
         </p>

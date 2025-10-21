@@ -26,13 +26,13 @@ import { CheckCircle } from "lucide-react";
 
 export default function Usuarios() {
   const { usuarios, updateUsuario } = useData();
-  const { user } = useAuth();
+  const { userRole } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>("user_comum");
 
   // Verificar se o usuário é admin
-  if (user?.role !== "admin") {
+  if (userRole !== "admin") {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -42,16 +42,16 @@ export default function Usuarios() {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!editingUsuario) return;
 
-    updateUsuario(editingUsuario.id, {
-      role: selectedRole,
-      status: selectedRole === "nenhum" ? "pendente" : "ativo"
-    });
-
-    toast.success("Usuário atualizado com sucesso!");
-    setIsDialogOpen(false);
+    try {
+      await updateUsuario(editingUsuario.id, selectedRole);
+      setIsDialogOpen(false);
+      setEditingUsuario(null);
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+    }
   };
 
   const getRoleBadge = (role: string) => {

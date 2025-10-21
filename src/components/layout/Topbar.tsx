@@ -12,11 +12,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export const Topbar = () => {
-  const { user, logout } = useAuth();
+  const { user, userName, userRole, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
   };
 
@@ -30,7 +30,7 @@ export const Topbar = () => {
     return badges[role as keyof typeof badges] || badges.nenhum;
   };
 
-  const badge = user ? getRoleBadge(user.role) : null;
+  const badge = userRole ? getRoleBadge(userRole) : null;
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-card px-6">
@@ -54,9 +54,9 @@ export const Topbar = () => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.nome}</p>
+                  <p className="text-sm font-medium leading-none">{userName}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
+                    {user?.email}
                   </p>
                   {badge && (
                     <span className={`mt-1 inline-flex w-fit rounded-full px-2 py-0.5 text-xs ${badge.className}`}>

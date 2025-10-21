@@ -1,62 +1,143 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { MockUser, UserRole } from "@/types";
-import { mockUsuarios } from "@/data/mockData";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { UserRole } from "@/types";
 
 interface AuthContextType {
-  user: MockUser | null;
-  login: (email: string, password: string) => boolean;
-  logout: () => void;
-  switchRole: (role: UserRole) => void;
+  user: User | null;
+  session: Session | null;
+  userRole: UserRole | null;
+  userName: string | null;
+  loading: boolean;
+  signUp: (email: string, password: string, nome: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signOut: () => Promise<void>;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Carregar usuário do localStorage na inicialização
-    const savedUser = localStorage.getItem("mockUser");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    // Configurar listener de mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Buscar role e nome do usuário em setTimeout para evitar deadlock
+          setTimeout(() => {
+            fetchUserData(session.user.id);
+          }, 0);
+        } else {
+          setUserRole(null);
+          setUserName(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
+    // Verificar sessão existente
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      }
+      
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (email: string, _password: string): boolean => {
-    // Mock login - aceita qualquer senha
-    const foundUser = mockUsuarios.find((u) => u.email === email);
-    
-    if (foundUser) {
-      const mockUser: MockUser = {
-        id: foundUser.id,
-        email: foundUser.email,
-        role: foundUser.role,
-        nome: foundUser.nome
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem("mockUser", JSON.stringify(mockUser));
-      return true;
+  const fetchUserData = async (userId: string) => {
+    try {
+      // Buscar role do usuário
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (roleData) {
+        setUserRole(roleData.role as UserRole);
+      }
+
+      // Buscar nome do perfil
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('nome')
+        .eq('id', userId)
+        .single();
+
+      if (profileData) {
+        setUserName(profileData.nome);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do usuário:', error);
     }
-    
-    return false;
   };
 
-  const logout = () => {
+  const signUp = async (email: string, password: string, nome: string) => {
+    const redirectUrl = `${window.location.origin}/dashboard`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          nome: nome
+        }
+      }
+    });
+
+    return { error };
+  };
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    return { error };
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("mockUser");
+    setSession(null);
+    setUserRole(null);
+    setUserName(null);
   };
 
-  const switchRole = (role: UserRole) => {
-    if (user) {
-      const updatedUser = { ...user, role };
-      setUser(updatedUser);
-      localStorage.setItem("mockUser", JSON.stringify(updatedUser));
-    }
-  };
+  const isAdmin = userRole === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, switchRole }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        session, 
+        userRole, 
+        userName,
+        loading, 
+        signUp, 
+        signIn, 
+        signOut,
+        isAdmin
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
