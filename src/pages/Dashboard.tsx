@@ -31,6 +31,9 @@ import {
 } from "recharts";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+const COR_PAGO = "#22c55e"; // verde
+const COR_A_RECEBER = "#ef4444"; // vermelho
+const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 export default function Dashboard() {
   const { servicos, categorias, filtros } = useData();
@@ -86,23 +89,50 @@ export default function Dashboard() {
       .reduce((sum, s) => sum + s.valor, 0);
     
     return {
-      mes: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][i],
+      mes: mesesNomes[i],
       valor
     };
   });
 
-  // Dados para gráfico de barras (pago x a receber por categoria)
-  const dadosPorCategoria = categorias.map(cat => {
-    const servicosCat = servicosFiltrados.filter(s => s.maquina_id === cat.id);
-    const pago = servicosCat.filter(s => s.status_cobranca === "pago").reduce((sum, s) => sum + s.valor, 0);
-    const aReceber = servicosCat.filter(s => s.status_cobranca === "a_receber").reduce((sum, s) => sum + s.valor, 0);
+  // Dados para gráfico de barras (pago x a receber por mês)
+  const pagoAReceberPorMes = Array.from({ length: 12 }, (_, i) => {
+    const mes = String(i + 1).padStart(2, '0');
+    const servicosMes = servicos.filter(s => {
+      const dataInicio = new Date(s.data_inicio);
+      return String(dataInicio.getMonth() + 1).padStart(2, '0') === mes &&
+             String(dataInicio.getFullYear()) === filtros.ano;
+    });
     
-    return {
-      nome: cat.nome_maquina,
-      pago,
-      a_receber: aReceber
-    };
-  }).filter(d => d.pago > 0 || d.a_receber > 0);
+    const pago = servicosMes.filter(s => s.status_cobranca === "pago").reduce((sum, s) => sum + s.valor, 0);
+    const aReceber = servicosMes.filter(s => s.status_cobranca === "a_receber").reduce((sum, s) => sum + s.valor, 0);
+    
+    return { mes: mesesNomes[i], pago, a_receber: aReceber };
+  });
+
+  // Dados para gráfico de pizza (pago x a receber total)
+  const pagoAReceberTotal = [
+    { nome: "Pago", valor: totalPago },
+    { nome: "A Receber", valor: totalAReceber }
+  ].filter(d => d.valor > 0);
+
+  // Dados para gráfico de linhas (faturamento de cada categoria por mês)
+  const faturamentoCategoriasPorMes = Array.from({ length: 12 }, (_, i) => {
+    const mes = String(i + 1).padStart(2, '0');
+    const dadosMes: any = { mes: mesesNomes[i] };
+    
+    categorias.forEach(cat => {
+      const valor = servicos.filter(s => {
+        const dataInicio = new Date(s.data_inicio);
+        return s.maquina_id === cat.id &&
+               String(dataInicio.getMonth() + 1).padStart(2, '0') === mes &&
+               String(dataInicio.getFullYear()) === filtros.ano;
+      }).reduce((sum, s) => sum + s.valor, 0);
+      
+      dadosMes[cat.nome_maquina] = valor;
+    });
+    
+    return dadosMes;
+  });
 
   // Dados para gráfico de pizza (faturamento anual por categoria)
   const faturamentoAnualPorCategoria = categorias.map(cat => {
@@ -115,6 +145,8 @@ export default function Dashboard() {
       valor
     };
   }).filter(d => d.valor > 0);
+
+  const coresPagoAReceber = [COR_PAGO, COR_A_RECEBER];
 
   return (
     <div className="space-y-6 animate-in">
@@ -156,7 +188,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Gráficos */}
+      {/* Gráficos - Linha 1 */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -175,6 +207,7 @@ export default function Dashboard() {
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
+                  formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
                 <Legend />
                 <Line 
@@ -191,14 +224,14 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Pago x A Receber</CardTitle>
-            <CardDescription>Por categoria</CardDescription>
+            <CardTitle>Pago x A Receber por Mês</CardTitle>
+            <CardDescription>Comparativo mensal de {filtros.ano}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={dadosPorCategoria}>
+              <BarChart data={pagoAReceberPorMes}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="nome" stroke="hsl(var(--muted-foreground))" />
+                <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
@@ -206,38 +239,102 @@ export default function Dashboard() {
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
+                  formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
                 <Legend />
-                <Bar dataKey="pago" fill="hsl(var(--chart-2))" name="Pago (R$)" />
-                <Bar dataKey="a_receber" fill="hsl(var(--chart-3))" name="A Receber (R$)" />
+                <Bar dataKey="pago" fill={COR_PAGO} name="Pago (R$)" />
+                <Bar dataKey="a_receber" fill={COR_A_RECEBER} name="A Receber (R$)" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
+      {/* Gráficos - Linha 2 */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pago x A Receber - Total</CardTitle>
+            <CardDescription>Distribuição geral</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pagoAReceberTotal}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ nome, percent }) => `${nome} (${(percent * 100).toFixed(0)}%)`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="valor"
+                >
+                  {pagoAReceberTotal.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={coresPagoAReceber[index]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "var(--radius)"
+                  }}
+                  formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Faturamento por Categoria</CardTitle>
+            <CardDescription>Distribuição do faturamento total</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={faturamentoAnualPorCategoria}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ nome, percent }) => `${nome} (${(percent * 100).toFixed(0)}%)`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="valor"
+                >
+                  {faturamentoAnualPorCategoria.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "var(--radius)"
+                  }}
+                  formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráfico - Linha 3 (Full Width) */}
       <Card>
         <CardHeader>
-          <CardTitle>Faturamento por Categoria</CardTitle>
-          <CardDescription>Distribuição do faturamento total</CardDescription>
+          <CardTitle>Faturamento por Categoria e Mês</CardTitle>
+          <CardDescription>Evolução mensal do faturamento de cada categoria em {filtros.ano}</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={350}>
-            <PieChart>
-              <Pie
-                data={faturamentoAnualPorCategoria}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ nome, percent }) => `${nome} (${(percent * 100).toFixed(0)}%)`}
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="valor"
-              >
-                {faturamentoAnualPorCategoria.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+            <LineChart data={faturamentoCategoriasPorMes}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />
+              <YAxis stroke="hsl(var(--muted-foreground))" />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -246,7 +343,18 @@ export default function Dashboard() {
                 }}
                 formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               />
-            </PieChart>
+              <Legend />
+              {categorias.map((cat, index) => (
+                <Line
+                  key={cat.id}
+                  type="monotone"
+                  dataKey={cat.nome_maquina}
+                  stroke={COLORS[index % COLORS.length]}
+                  strokeWidth={2}
+                  name={cat.nome_maquina}
+                />
+              ))}
+            </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
