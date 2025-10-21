@@ -20,17 +20,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, Grid, List } from "lucide-react";
 import { toast } from "sonner";
 import { Servico } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { FiltrosServicos } from "@/components/servicos/FiltrosServicos";
+import { ServicoCard } from "@/components/servicos/ServicoCard";
+import { format } from "date-fns";
 
 export default function Servicos() {
   const { servicos, clientes, categorias, addServico, updateServico, deleteServico } = useData();
   const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingServico, setEditingServico] = useState<Servico | null>(null);
+  const [viewingServico, setViewingServico] = useState<Servico | null>(null);
   const [formData, setFormData] = useState<Partial<Servico>>({});
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
+  const [filtrosLocais, setFiltrosLocais] = useState({
+    data_inicio: "",
+    data_fim: "",
+    cliente_id: "all",
+    status_cobranca: "all"
+  });
 
   const canEdit = isAdmin;
 
@@ -46,6 +58,11 @@ export default function Servicos() {
     setEditingServico(servico);
     setFormData(servico);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (servico: Servico) => {
+    setViewingServico(servico);
+    setIsViewDialogOpen(true);
   };
 
   const handleDelete = (servico: Servico) => {
@@ -103,6 +120,22 @@ export default function Servicos() {
     );
   };
 
+  // Aplicar filtros locais
+  const servicosFiltrados = servicos.filter(s => {
+    const clienteMatch = filtrosLocais.cliente_id === "all" || s.cliente_id === filtrosLocais.cliente_id;
+    const statusMatch = filtrosLocais.status_cobranca === "all" || s.status_cobranca === filtrosLocais.status_cobranca;
+    
+    let dataMatch = true;
+    if (filtrosLocais.data_inicio) {
+      dataMatch = dataMatch && new Date(s.data_inicio) >= new Date(filtrosLocais.data_inicio);
+    }
+    if (filtrosLocais.data_fim) {
+      dataMatch = dataMatch && new Date(s.data_fim) <= new Date(filtrosLocais.data_fim);
+    }
+    
+    return clienteMatch && statusMatch && dataMatch;
+  });
+
   const columns = [
     { header: "Título", accessor: "titulo_servico" as keyof Servico, sortable: true },
     { 
@@ -134,24 +167,72 @@ export default function Servicos() {
           <h1 className="text-3xl font-bold">Serviços</h1>
           <p className="text-muted-foreground">Gerencie seus serviços e aluguéis</p>
         </div>
-        {canEdit && (
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Serviço
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'cards' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('cards')}
+            title="Visualizar em cards"
+          >
+            <Grid className="h-4 w-4" />
           </Button>
-        )}
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('table')}
+            title="Visualizar em tabela"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          {canEdit && (
+            <Button onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Serviço
+            </Button>
+          )}
+        </div>
       </div>
 
-      <DataTable
-        data={servicos}
-        columns={columns}
-        onEdit={canEdit ? handleEdit : undefined}
-        onDelete={canEdit ? handleDelete : undefined}
-        searchPlaceholder="Buscar serviços..."
-        emptyMessage="Nenhum serviço cadastrado"
-        canEdit={canEdit}
-        canDelete={canEdit}
+      <FiltrosServicos 
+        filtros={filtrosLocais}
+        onFiltrosChange={setFiltrosLocais}
+        clientes={clientes}
       />
+
+      {viewMode === 'cards' ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {servicosFiltrados.length > 0 ? (
+            servicosFiltrados.map((servico) => (
+              <ServicoCard
+                key={servico.id}
+                servico={servico}
+                cliente={clientes.find(c => c.id === servico.cliente_id)}
+                categoria={categorias.find(c => c.id === servico.maquina_id)}
+                onView={() => handleView(servico)}
+                onEdit={canEdit ? () => handleEdit(servico) : undefined}
+                onDelete={canEdit ? () => handleDelete(servico) : undefined}
+                canEdit={canEdit}
+                canDelete={canEdit}
+              />
+            ))
+          ) : (
+            <p className="col-span-full text-center text-muted-foreground py-8">
+              Nenhum serviço encontrado
+            </p>
+          )}
+        </div>
+      ) : (
+        <DataTable
+          data={servicosFiltrados}
+          columns={columns}
+          onEdit={canEdit ? handleEdit : undefined}
+          onDelete={canEdit ? handleDelete : undefined}
+          searchPlaceholder="Buscar serviços..."
+          emptyMessage="Nenhum serviço cadastrado"
+          canEdit={canEdit}
+          canDelete={canEdit}
+        />
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -339,6 +420,91 @@ export default function Servicos() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualização */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Serviço</DialogTitle>
+            <DialogDescription>
+              Informações completas do serviço
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewingServico && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Cliente</Label>
+                  <p className="text-base">{clientes.find(c => c.id === viewingServico.cliente_id)?.nome || "N/A"}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Máquina</Label>
+                  <p className="text-base">{categorias.find(c => c.id === viewingServico.maquina_id)?.nome_maquina || "N/A"}</p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-semibold text-muted-foreground">Título</Label>
+                <p className="text-base">{viewingServico.titulo_servico}</p>
+              </div>
+
+              {viewingServico.descricao && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Descrição</Label>
+                  <p className="text-base whitespace-pre-wrap">{viewingServico.descricao}</p>
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Valor</Label>
+                  <p className="text-2xl font-bold">R$ {viewingServico.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Forma de Pagamento</Label>
+                  <p className="text-base capitalize">{viewingServico.forma_pagamento.replace('_', ' ')}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Status</Label>
+                  <div className="mt-1">{getStatusBadge(viewingServico.status)}</div>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Status Cobrança</Label>
+                  <div className="mt-1">{getCobrancaBadge(viewingServico.status_cobranca)}</div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Data Início</Label>
+                  <p className="text-base">{format(new Date(viewingServico.data_inicio), "dd/MM/yyyy")}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Data Fim</Label>
+                  <p className="text-base">{format(new Date(viewingServico.data_fim), "dd/MM/yyyy")}</p>
+                </div>
+              </div>
+
+              {viewingServico.observacoes && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Observações</Label>
+                  <p className="text-base whitespace-pre-wrap">{viewingServico.observacoes}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <Button onClick={() => setIsViewDialogOpen(false)}>
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

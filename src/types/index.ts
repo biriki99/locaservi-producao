@@ -69,4 +69,7 @@ export interface Filtros {
   mes: string;
   ano: string;
   categoria_id: string;
+  cliente_id?: string;
+  data_inicio?: string;
+  data_fim?: string;
 }

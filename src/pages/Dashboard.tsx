@@ -47,8 +47,18 @@ export default function Dashboard() {
     const mesMatch = filtros.mes === "all" || mesServico === filtros.mes;
     const anoMatch = filtros.ano === "all" || anoServico === filtros.ano;
     const catMatch = filtros.categoria_id === "all" || s.maquina_id === filtros.categoria_id;
+    const clienteMatch = !filtros.cliente_id || filtros.cliente_id === "all" || s.cliente_id === filtros.cliente_id;
     
-    return mesMatch && anoMatch && catMatch;
+    // Filtro de data range
+    let dataMatch = true;
+    if (filtros.data_inicio) {
+      dataMatch = dataMatch && new Date(s.data_inicio) >= new Date(filtros.data_inicio);
+    }
+    if (filtros.data_fim) {
+      dataMatch = dataMatch && new Date(s.data_fim) <= new Date(filtros.data_fim);
+    }
+    
+    return mesMatch && anoMatch && catMatch && clienteMatch && dataMatch;
   });
 
   // Calcular KPIs

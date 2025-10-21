@@ -44,7 +44,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [filtros, setFiltros] = useState<Filtros>({
     mes: "all",
     ano: new Date().getFullYear().toString(),
-    categoria_id: "all"
+    categoria_id: "all",
+    cliente_id: "all",
+    data_inicio: "",
+    data_fim: ""
   });
 
   useEffect(() => {
