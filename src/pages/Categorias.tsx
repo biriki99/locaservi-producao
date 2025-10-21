@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Grid, List, Eye } from "lucide-react";
+import { Plus, Grid, List, Eye, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Categoria } from "@/types";
 import { CategoriaCard } from "@/components/categorias/CategoriaCard";
@@ -27,9 +27,25 @@ export default function Categorias() {
   const [editingCategoria, setEditingCategoria] = useState<Categoria | null>(null);
   const [viewingCategoria, setViewingCategoria] = useState<Categoria | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<Categoria>>({});
 
   const canEdit = isAdmin;
+
+  // Ordenar categorias alfabeticamente
+  const categoriasOrdenadas = [...categorias].sort((a, b) => 
+    a.nome_maquina.localeCompare(b.nome_maquina, 'pt-BR', { sensitivity: 'base' })
+  );
+
+  // Filtrar por busca
+  const categoriasFiltradas = categoriasOrdenadas.filter((categoria) => {
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      categoria.nome_maquina.toLowerCase().includes(searchLower) ||
+      categoria.observacao?.toLowerCase().includes(searchLower)
+    );
+  });
 
   const handleCreate = () => {
     setEditingCategoria(null);
@@ -114,9 +130,31 @@ export default function Categorias() {
         </div>
       </div>
 
+      {/* Campo de busca */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome da máquina ou observação..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        {searchTerm && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSearchTerm("")}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
       {viewMode === 'cards' ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {categorias.map((categoria) => (
+          {categoriasFiltradas.map((categoria) => (
             <CategoriaCard
               key={categoria.id}
               categoria={categoria}
@@ -130,7 +168,7 @@ export default function Categorias() {
         </div>
       ) : (
         <DataTable
-          data={categorias}
+          data={categoriasFiltradas}
           columns={columns}
           onEdit={canEdit ? handleEdit : undefined}
           onDelete={canEdit ? handleDelete : undefined}
