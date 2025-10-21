@@ -48,8 +48,14 @@ export default function Clientes() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nome || !formData.telefone || !formData.email) {
-      toast.error("Preencha todos os campos obrigatórios");
+    if (!formData.nome?.trim()) {
+      toast.error("O campo Nome é obrigatório");
+      return;
+    }
+
+    // Validar email apenas se preenchido
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error("Email inválido");
       return;
     }
 
@@ -60,8 +66,8 @@ export default function Clientes() {
       const newCliente: Cliente = {
         id: `cliente-${Date.now()}`,
         nome: formData.nome!,
-        telefone: formData.telefone!,
-        email: formData.email!,
+        telefone: formData.telefone || "",
+        email: formData.email || "",
         cpf_cnpj: formData.cpf_cnpj || "",
         endereco: formData.endereco || "",
         observacoes: formData.observacoes || "",
@@ -121,52 +127,54 @@ export default function Clientes() {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="nome">Nome *</Label>
+              <Input
+                id="nome"
+                placeholder="Nome completo ou razão social"
+                value={formData.nome || ""}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                required
+              />
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome *</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome || ""}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="telefone">Telefone *</Label>
-                <Input
-                  id="telefone"
-                  value={formData.telefone || ""}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  type="email"
+                  placeholder="email@exemplo.com"
                   value={formData.email || ""}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
+                <Label htmlFor="telefone">Telefone</Label>
                 <Input
-                  id="cpf_cnpj"
-                  value={formData.cpf_cnpj || ""}
-                  onChange={(e) => setFormData({ ...formData, cpf_cnpj: e.target.value })}
+                  id="telefone"
+                  placeholder="+55 11 99999-9999"
+                  value={formData.telefone || ""}
+                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
+              <Input
+                id="cpf_cnpj"
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                value={formData.cpf_cnpj || ""}
+                onChange={(e) => setFormData({ ...formData, cpf_cnpj: e.target.value })}
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="endereco">Endereço</Label>
               <Input
                 id="endereco"
+                placeholder="Rua, número, bairro, cidade - UF"
                 value={formData.endereco || ""}
                 onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
               />
@@ -176,6 +184,7 @@ export default function Clientes() {
               <Label htmlFor="observacoes">Observações</Label>
               <Textarea
                 id="observacoes"
+                placeholder="Observações sobre o cliente"
                 value={formData.observacoes || ""}
                 onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                 rows={3}
