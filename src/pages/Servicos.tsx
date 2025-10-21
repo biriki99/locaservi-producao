@@ -27,12 +27,12 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Servicos() {
   const { servicos, clientes, categorias, addServico, updateServico, deleteServico } = useData();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingServico, setEditingServico] = useState<Servico | null>(null);
   const [formData, setFormData] = useState<Partial<Servico>>({});
 
-  const canEdit = user?.role === "admin";
+  const canEdit = isAdmin;
 
   const handleCreate = () => {
     if (!canEdit) return;

@@ -27,12 +27,12 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Leads() {
   const { leads, addLead, updateLead, deleteLead } = useData();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [formData, setFormData] = useState<Partial<Lead>>({});
 
-  const canEdit = user?.role === "admin";
+  const canEdit = isAdmin;
 
   const handleCreate = () => {
     if (!canEdit) return;

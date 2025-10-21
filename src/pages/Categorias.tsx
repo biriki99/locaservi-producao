@@ -19,12 +19,12 @@ import { Categoria } from "@/types";
 
 export default function Categorias() {
   const { categorias, addCategoria, updateCategoria, deleteCategoria } = useData();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategoria, setEditingCategoria] = useState<Categoria | null>(null);
   const [formData, setFormData] = useState<Partial<Categoria>>({});
 
-  const canEdit = user?.role === "admin";
+  const canEdit = isAdmin;
 
   const handleCreate = () => {
     setEditingCategoria(null);

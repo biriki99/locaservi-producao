@@ -19,12 +19,12 @@ import { Cliente } from "@/types";
 
 export default function Clientes() {
   const { clientes, addCliente, updateCliente, deleteCliente } = useData();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [formData, setFormData] = useState<Partial<Cliente>>({});
 
-  const canEdit = user?.role === "admin";
+  const canEdit = isAdmin;
 
   const handleCreate = () => {
     if (!canEdit) return;
