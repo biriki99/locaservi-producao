@@ -56,7 +56,7 @@ export default function Leads() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.nome || !formData.telefone || !formData.interesse) {
@@ -66,21 +66,15 @@ export default function Leads() {
 
     if (editingLead) {
       updateLead(editingLead.id, formData);
-      toast.success("Lead atualizado com sucesso!");
     } else {
-      const newLead: Lead = {
-        id: `lead-${Date.now()}`,
+      await addLead({
         nome: formData.nome!,
         telefone: formData.telefone!,
         email: formData.email || "",
         interesse: formData.interesse!,
         status: formData.status || "novo",
-        observacoes: formData.observacoes || "",
-        created_at: new Date().toISOString(),
-        user_id: user?.id || "user-123"
-      };
-      addLead(newLead);
-      toast.success("Lead criado com sucesso!");
+        observacoes: formData.observacoes || ""
+      });
     }
 
     setIsDialogOpen(false);

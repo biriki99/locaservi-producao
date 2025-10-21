@@ -45,7 +45,7 @@ export default function Categorias() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.nome_maquina) {
@@ -55,17 +55,11 @@ export default function Categorias() {
 
     if (editingCategoria) {
       updateCategoria(editingCategoria.id, formData);
-      toast.success("Categoria atualizada com sucesso!");
     } else {
-      const newCategoria: Categoria = {
-        id: `cat-${Date.now()}`,
+      await addCategoria({
         nome_maquina: formData.nome_maquina!,
-        observacao: formData.observacao || "",
-        created_at: new Date().toISOString(),
-        user_id: user?.id || "user-123"
-      };
-      addCategoria(newCategoria);
-      toast.success("Categoria criada com sucesso!");
+        observacao: formData.observacao || ""
+      });
     }
 
     setIsDialogOpen(false);

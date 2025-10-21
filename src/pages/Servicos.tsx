@@ -56,7 +56,7 @@ export default function Servicos() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.titulo_servico || !formData.cliente_id || !formData.maquina_id || !formData.valor || !formData.data_inicio || !formData.data_fim) {
@@ -66,11 +66,8 @@ export default function Servicos() {
 
     if (editingServico) {
       updateServico(editingServico.id, formData);
-      toast.success("Serviço atualizado com sucesso!");
     } else {
-      const newServico: Servico = {
-        id: `svc-${Date.now()}`,
-        user_id: user?.id || "user-123",
+      await addServico({
         cliente_id: formData.cliente_id!,
         maquina_id: formData.maquina_id!,
         titulo_servico: formData.titulo_servico!,
@@ -81,11 +78,8 @@ export default function Servicos() {
         forma_pagamento: formData.forma_pagamento || "a_receber",
         data_inicio: formData.data_inicio || new Date().toISOString().split('T')[0],
         data_fim: formData.data_fim || new Date().toISOString().split('T')[0],
-        observacoes: formData.observacoes || "",
-        created_at: new Date().toISOString()
-      };
-      addServico(newServico);
-      toast.success("Serviço criado com sucesso!");
+        observacoes: formData.observacoes || ""
+      });
     }
 
     setIsDialogOpen(false);

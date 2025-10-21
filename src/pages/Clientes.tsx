@@ -48,7 +48,7 @@ export default function Clientes() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.nome?.trim()) {
@@ -64,21 +64,15 @@ export default function Clientes() {
 
     if (editingCliente) {
       updateCliente(editingCliente.id, formData);
-      toast.success("Cliente atualizado com sucesso!");
     } else {
-      const newCliente: Cliente = {
-        id: `cliente-${Date.now()}`,
+      await addCliente({
         nome: formData.nome!,
         telefone: formData.telefone || "",
         email: formData.email || "",
         cpf_cnpj: formData.cpf_cnpj || "",
         endereco: formData.endereco || "",
-        observacoes: formData.observacoes || "",
-        created_at: new Date().toISOString(),
-        user_id: user?.id || "user-123"
-      };
-      addCliente(newCliente);
-      toast.success("Cliente criado com sucesso!");
+        observacoes: formData.observacoes || ""
+      });
     }
 
     setIsDialogOpen(false);
