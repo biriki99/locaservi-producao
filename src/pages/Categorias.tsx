@@ -119,6 +119,7 @@ export default function Categorias() {
               <Label htmlFor="nome_maquina">Nome da Máquina *</Label>
               <Input
                 id="nome_maquina"
+                placeholder="Ex: Betoneira 200L"
                 value={formData.nome_maquina || ""}
                 onChange={(e) => setFormData({ ...formData, nome_maquina: e.target.value })}
                 required
@@ -129,9 +130,10 @@ export default function Categorias() {
               <Label htmlFor="observacao">Observação</Label>
               <Textarea
                 id="observacao"
+                placeholder="Especificações técnicas ou detalhes da máquina"
                 value={formData.observacao || ""}
                 onChange={(e) => setFormData({ ...formData, observacao: e.target.value })}
-                rows={3}
+                rows={4}
               />
             </div>
 
