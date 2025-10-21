@@ -35,18 +35,21 @@ export default function Servicos() {
   const canEdit = user?.role === "admin";
 
   const handleCreate = () => {
+    if (!canEdit) return;
     setEditingServico(null);
     setFormData({});
     setIsDialogOpen(true);
   };
 
   const handleEdit = (servico: Servico) => {
+    if (!canEdit) return;
     setEditingServico(servico);
     setFormData(servico);
     setIsDialogOpen(true);
   };
 
   const handleDelete = (servico: Servico) => {
+    if (!canEdit) return;
     if (confirm(`Deseja realmente excluir o serviço ${servico.titulo_servico}?`)) {
       deleteServico(servico.id);
       toast.success("Serviço excluído com sucesso!");

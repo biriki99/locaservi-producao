@@ -13,6 +13,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
   const { signIn, signUp, user, userRole } = useAuth();
   const navigate = useNavigate();
 
@@ -57,6 +58,12 @@ export default function Login() {
       toast.error(error.message || "Erro ao criar conta");
     } else {
       toast.success("Conta criada! Aguarde aprovação do administrador.");
+      // Limpar campos
+      setEmail("");
+      setPassword("");
+      setNome("");
+      // Mudar para aba de login
+      setActiveTab("login");
     }
 
     setLoading(false);
@@ -75,7 +82,7 @@ export default function Login() {
           </p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="cadastro">Cadastro</TabsTrigger>

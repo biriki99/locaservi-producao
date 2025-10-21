@@ -27,18 +27,21 @@ export default function Clientes() {
   const canEdit = user?.role === "admin";
 
   const handleCreate = () => {
+    if (!canEdit) return;
     setEditingCliente(null);
     setFormData({});
     setIsDialogOpen(true);
   };
 
   const handleEdit = (cliente: Cliente) => {
+    if (!canEdit) return;
     setEditingCliente(cliente);
     setFormData(cliente);
     setIsDialogOpen(true);
   };
 
   const handleDelete = (cliente: Cliente) => {
+    if (!canEdit) return;
     if (confirm(`Deseja realmente excluir o cliente ${cliente.nome}?`)) {
       deleteCliente(cliente.id);
       toast.success("Cliente excluído com sucesso!");

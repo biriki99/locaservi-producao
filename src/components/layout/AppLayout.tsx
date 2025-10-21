@@ -1,11 +1,15 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Topbar } from "./Topbar";
 import { Sidebar } from "./Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const AppLayout = () => {
   const { user, userRole, loading } = useAuth();
+  const location = useLocation();
 
+  // Rotas permitidas para usuário comum
+  const commonUserRoutes = ["/dashboard", "/clientes", "/leads", "/servicos"];
+  
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -23,6 +27,11 @@ export const AppLayout = () => {
 
   if (userRole === "nenhum") {
     return <Navigate to="/pendente" replace />;
+  }
+
+  // Verificar se usuário comum está tentando acessar rota restrita
+  if (userRole === "user_comum" && !commonUserRoutes.includes(location.pathname)) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (

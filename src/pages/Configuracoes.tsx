@@ -1,11 +1,15 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { UserRole } from "@/types";
+import { Moon, Sun } from "lucide-react";
 
 export default function Configuracoes() {
   const { user, userName, userRole } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const getRoleLabel = (role: UserRole | null) => {
     if (!role) return "Carregando...";
@@ -46,6 +50,38 @@ export default function Configuracoes() {
                   {getRoleLabel(userRole)}
                 </Badge>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Preferências de Tema</CardTitle>
+            <CardDescription>Escolha entre modo claro ou escuro</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {theme === "dark" ? (
+                  <Moon className="h-5 w-5 text-primary" />
+                ) : (
+                  <Sun className="h-5 w-5 text-primary" />
+                )}
+                <div>
+                  <Label className="font-medium">
+                    {theme === "dark" ? "Modo Escuro" : "Modo Claro"}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {theme === "dark" 
+                      ? "Tema escuro ativado" 
+                      : "Tema claro ativado"}
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={theme === "dark"} 
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
             </div>
           </CardContent>
         </Card>

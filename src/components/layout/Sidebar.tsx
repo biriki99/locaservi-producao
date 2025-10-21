@@ -14,11 +14,11 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "user_comum"] },
   { name: "Clientes", href: "/clientes", icon: Users, roles: ["admin", "user_comum"] },
-  { name: "Categorias", href: "/categorias", icon: Package, roles: ["admin", "user_comum"] },
+  { name: "Categorias", href: "/categorias", icon: Package, roles: ["admin"] },
   { name: "Serviços", href: "/servicos", icon: Wrench, roles: ["admin", "user_comum"] },
   { name: "Leads", href: "/leads", icon: MessageSquare, roles: ["admin", "user_comum"] },
   { name: "Usuários", href: "/usuarios", icon: UserCog, roles: ["admin"] },
-  { name: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin", "user_comum"] }
+  { name: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin"] }
 ];
 
 export const Sidebar = () => {

@@ -35,18 +35,21 @@ export default function Leads() {
   const canEdit = user?.role === "admin";
 
   const handleCreate = () => {
+    if (!canEdit) return;
     setEditingLead(null);
     setFormData({});
     setIsDialogOpen(true);
   };
 
   const handleEdit = (lead: Lead) => {
+    if (!canEdit) return;
     setEditingLead(lead);
     setFormData(lead);
     setIsDialogOpen(true);
   };
 
   const handleDelete = (lead: Lead) => {
+    if (!canEdit) return;
     if (confirm(`Deseja realmente excluir o lead ${lead.nome}?`)) {
       deleteLead(lead.id);
       toast.success("Lead excluído com sucesso!");
