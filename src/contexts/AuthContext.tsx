@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/types";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: User | null;
@@ -73,15 +74,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserRole(roleData.role as UserRole);
       }
 
-      // Buscar nome do perfil
+      // Buscar nome e status do perfil
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('nome')
+        .select('nome, status')
         .eq('id', userId)
         .single();
 
       if (profileData) {
         setUserName(profileData.nome);
+        
+        // Verificar se usuário está inativo e fazer logout
+        if (profileData.status === 'inativo') {
+          await supabase.auth.signOut();
+          toast.error('Sua conta foi desativada. Entre em contato com o administrador.');
+          setUser(null);
+          setSession(null);
+          setUserRole(null);
+          setUserName(null);
+          return;
+        }
       }
     } catch (error) {
       console.error('Erro ao buscar dados do usuário:', error);

@@ -26,6 +26,8 @@ interface DataContextType {
   updateLead: (id: string, lead: Partial<Lead>) => Promise<void>;
   deleteLead: (id: string) => Promise<void>;
   updateUsuario: (id: string, role: string) => Promise<void>;
+  deleteUsuario: (id: string) => Promise<void>;
+  inactivateUsuario: (id: string, status: 'ativo' | 'inativo') => Promise<void>;
   refreshData: () => Promise<void>;
 }
 
@@ -158,7 +160,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: profile.email,
         nome: profile.nome,
         role: role,
-        status: role === 'nenhum' ? 'pendente' : 'ativo',
+        status: (profile.status || 'ativo') as 'ativo' | 'pendente' | 'inativo',
         created_at: profile.created_at
       } as Usuario;
     }) || [];
@@ -368,6 +370,36 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fetchUsuarios();
   };
 
+  const deleteUsuario = async (id: string) => {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', id);
+
+    if (profileError) {
+      toast.error('Erro ao deletar usuário');
+      throw profileError;
+    }
+
+    toast.success('Usuário deletado com sucesso');
+    await fetchUsuarios();
+  };
+
+  const inactivateUsuario = async (id: string, status: 'ativo' | 'inativo') => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Erro ao atualizar status do usuário');
+      throw error;
+    }
+
+    toast.success(`Usuário ${status === 'ativo' ? 'ativado' : 'inativado'} com sucesso`);
+    await fetchUsuarios();
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -392,6 +424,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateLead,
         deleteLead,
         updateUsuario,
+        deleteUsuario,
+        inactivateUsuario,
         refreshData
       }}
     >

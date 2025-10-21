@@ -25,11 +25,12 @@ import { Navigate } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 
 export default function Usuarios() {
-  const { usuarios, updateUsuario } = useData();
+  const { usuarios, updateUsuario, deleteUsuario, inactivateUsuario } = useData();
   const { userRole } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>("user_comum");
+  const [selectedStatus, setSelectedStatus] = useState<'ativo' | 'inativo'>('ativo');
 
   // Verificar se o usuário é admin
   if (userRole !== "admin") {
@@ -39,14 +40,34 @@ export default function Usuarios() {
   const handleAprovar = (usuario: Usuario) => {
     setEditingUsuario(usuario);
     setSelectedRole(usuario.role === "nenhum" ? "user_comum" : usuario.role);
+    setSelectedStatus(usuario.status === 'inativo' ? 'inativo' : 'ativo');
     setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (usuario: Usuario) => {
+    if (!confirm(`Tem certeza que deseja deletar o usuário ${usuario.nome}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    
+    try {
+      await deleteUsuario(usuario.id);
+    } catch (error) {
+      console.error('Erro ao deletar usuário:', error);
+    }
   };
 
   const handleSubmit = async () => {
     if (!editingUsuario) return;
 
     try {
+      // Atualizar role
       await updateUsuario(editingUsuario.id, selectedRole);
+      
+      // Atualizar status se mudou
+      if (selectedStatus !== editingUsuario.status) {
+        await inactivateUsuario(editingUsuario.id, selectedStatus);
+      }
+      
       setIsDialogOpen(false);
       setEditingUsuario(null);
     } catch (error) {
@@ -102,10 +123,11 @@ export default function Usuarios() {
         data={usuarios}
         columns={columns}
         onEdit={handleAprovar}
+        onDelete={handleDelete}
         searchPlaceholder="Buscar usuários..."
         emptyMessage="Nenhum usuário cadastrado"
         canEdit={true}
-        canDelete={false}
+        canDelete={true}
       />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -146,6 +168,27 @@ export default function Usuarios() {
                   {selectedRole === "admin" && "Acesso total ao sistema"}
                   {selectedRole === "user_comum" && "Acesso de leitura"}
                   {selectedRole === "nenhum" && "Sem acesso - conta pendente"}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={(value: 'ativo' | 'inativo') => setSelectedStatus(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ativo">Ativo</SelectItem>
+                    <SelectItem value="inativo">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {selectedStatus === "ativo" 
+                    ? "Usuário pode acessar o sistema" 
+                    : "Usuário não pode fazer login"}
                 </p>
               </div>
 

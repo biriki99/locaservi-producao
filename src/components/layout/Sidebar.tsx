@@ -18,7 +18,7 @@ const navigation = [
   { name: "Serviços", href: "/servicos", icon: Wrench, roles: ["admin", "user_comum"] },
   { name: "Leads", href: "/leads", icon: MessageSquare, roles: ["admin", "user_comum"] },
   { name: "Usuários", href: "/usuarios", icon: UserCog, roles: ["admin"] },
-  { name: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin"] }
+  { name: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin", "user_comum"] }
 ];
 
 export const Sidebar = () => {

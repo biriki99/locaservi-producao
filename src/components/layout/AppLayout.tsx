@@ -8,7 +8,7 @@ export const AppLayout = () => {
   const location = useLocation();
 
   // Rotas permitidas para usuário comum
-  const commonUserRoutes = ["/dashboard", "/clientes", "/leads", "/servicos"];
+  const commonUserRoutes = ["/dashboard", "/clientes", "/leads", "/servicos", "/configuracoes"];
   
   if (loading) {
     return (
