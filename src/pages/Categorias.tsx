@@ -13,15 +13,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, Grid, List, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Categoria } from "@/types";
+import { CategoriaCard } from "@/components/categorias/CategoriaCard";
+import { format } from "date-fns";
 
 export default function Categorias() {
   const { categorias, addCategoria, updateCategoria, deleteCategoria } = useData();
   const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingCategoria, setEditingCategoria] = useState<Categoria | null>(null);
+  const [viewingCategoria, setViewingCategoria] = useState<Categoria | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
   const [formData, setFormData] = useState<Partial<Categoria>>({});
 
   const canEdit = isAdmin;
@@ -43,6 +48,11 @@ export default function Categorias() {
       deleteCategoria(categoria.id);
       toast.success("Categoria excluída com sucesso!");
     }
+  };
+
+  const handleView = (categoria: Categoria) => {
+    setViewingCategoria(categoria);
+    setIsViewDialogOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,25 +88,60 @@ export default function Categorias() {
           <h1 className="text-3xl font-bold">Categorias</h1>
           <p className="text-muted-foreground">Gerencie as categorias de máquinas</p>
         </div>
-        {canEdit && (
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Categoria
-          </Button>
-        )}
+        <div className="flex gap-2">
+          <div className="flex gap-1 border rounded-lg p-1">
+            <Button
+              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          {canEdit && (
+            <Button onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Categoria
+            </Button>
+          )}
+        </div>
       </div>
 
-      <DataTable
-        data={categorias}
-        columns={columns}
-        onEdit={canEdit ? handleEdit : undefined}
-        onDelete={canEdit ? handleDelete : undefined}
-        searchPlaceholder="Buscar categorias..."
-        emptyMessage="Nenhuma categoria cadastrada"
-        canEdit={canEdit}
-        canDelete={canEdit}
-      />
+      {viewMode === 'cards' ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {categorias.map((categoria) => (
+            <CategoriaCard
+              key={categoria.id}
+              categoria={categoria}
+              onView={() => handleView(categoria)}
+              onEdit={canEdit ? () => handleEdit(categoria) : undefined}
+              onDelete={canEdit ? () => handleDelete(categoria) : undefined}
+              canEdit={canEdit}
+              canDelete={canEdit}
+            />
+          ))}
+        </div>
+      ) : (
+        <DataTable
+          data={categorias}
+          columns={columns}
+          onEdit={canEdit ? handleEdit : undefined}
+          onDelete={canEdit ? handleDelete : undefined}
+          searchPlaceholder="Buscar categorias..."
+          emptyMessage="Nenhuma categoria cadastrada"
+          canEdit={canEdit}
+          canDelete={canEdit}
+        />
+      )}
 
+      {/* Dialog de Criação/Edição */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -140,6 +185,34 @@ export default function Categorias() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualização */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes da Categoria</DialogTitle>
+            <DialogDescription>Informações completas da categoria de máquina</DialogDescription>
+          </DialogHeader>
+          {viewingCategoria && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-muted-foreground">Nome da Máquina</Label>
+                <p className="font-semibold text-lg">{viewingCategoria.nome_maquina}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Observações</Label>
+                <p className="font-semibold whitespace-pre-wrap">{viewingCategoria.observacao || "Nenhuma observação"}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Data de Cadastro</Label>
+                <p className="font-semibold">{format(new Date(viewingCategoria.created_at), "dd/MM/yyyy HH:mm")}</p>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

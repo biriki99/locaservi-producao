@@ -13,15 +13,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, Grid, List, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Cliente } from "@/types";
+import { ClienteCard } from "@/components/clientes/ClienteCard";
+import { format } from "date-fns";
 
 export default function Clientes() {
   const { clientes, addCliente, updateCliente, deleteCliente } = useData();
   const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [viewingCliente, setViewingCliente] = useState<Cliente | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
   const [formData, setFormData] = useState<Partial<Cliente>>({});
 
   const canEdit = isAdmin;
@@ -46,6 +51,11 @@ export default function Clientes() {
       deleteCliente(cliente.id);
       toast.success("Cliente excluído com sucesso!");
     }
+  };
+
+  const handleView = (cliente: Cliente) => {
+    setViewingCliente(cliente);
+    setIsViewDialogOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,25 +103,60 @@ export default function Clientes() {
           <h1 className="text-3xl font-bold">Clientes</h1>
           <p className="text-muted-foreground">Gerencie seus clientes</p>
         </div>
-        {canEdit && (
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Cliente
-          </Button>
-        )}
+        <div className="flex gap-2">
+          <div className="flex gap-1 border rounded-lg p-1">
+            <Button
+              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          {canEdit && (
+            <Button onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Cliente
+            </Button>
+          )}
+        </div>
       </div>
 
-      <DataTable
-        data={clientes}
-        columns={columns}
-        onEdit={canEdit ? handleEdit : undefined}
-        onDelete={canEdit ? handleDelete : undefined}
-        searchPlaceholder="Buscar clientes..."
-        emptyMessage="Nenhum cliente cadastrado"
-        canEdit={canEdit}
-        canDelete={canEdit}
-      />
+      {viewMode === 'cards' ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {clientes.map((cliente) => (
+            <ClienteCard
+              key={cliente.id}
+              cliente={cliente}
+              onView={() => handleView(cliente)}
+              onEdit={canEdit ? () => handleEdit(cliente) : undefined}
+              onDelete={canEdit ? () => handleDelete(cliente) : undefined}
+              canEdit={canEdit}
+              canDelete={canEdit}
+            />
+          ))}
+        </div>
+      ) : (
+        <DataTable
+          data={clientes}
+          columns={columns}
+          onEdit={canEdit ? handleEdit : undefined}
+          onDelete={canEdit ? handleDelete : undefined}
+          searchPlaceholder="Buscar clientes..."
+          emptyMessage="Nenhum cliente cadastrado"
+          canEdit={canEdit}
+          canDelete={canEdit}
+        />
+      )}
 
+      {/* Dialog de Criação/Edição */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -197,6 +242,56 @@ export default function Clientes() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualização */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Cliente</DialogTitle>
+            <DialogDescription>Informações completas do cliente</DialogDescription>
+          </DialogHeader>
+          {viewingCliente && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-muted-foreground">Nome</Label>
+                  <p className="font-semibold">{viewingCliente.nome}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">CPF/CNPJ</Label>
+                  <p className="font-semibold">{viewingCliente.cpf_cnpj || "Não informado"}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-muted-foreground">Email</Label>
+                  <p className="font-semibold">{viewingCliente.email || "Não informado"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Telefone</Label>
+                  <p className="font-semibold">{viewingCliente.telefone || "Não informado"}</p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Endereço</Label>
+                <p className="font-semibold">{viewingCliente.endereco || "Não informado"}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Observações</Label>
+                <p className="font-semibold whitespace-pre-wrap">{viewingCliente.observacoes || "Nenhuma observação"}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Data de Cadastro</Label>
+                <p className="font-semibold">{format(new Date(viewingCliente.created_at), "dd/MM/yyyy HH:mm")}</p>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

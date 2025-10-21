@@ -20,16 +20,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, Grid, List, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Lead } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { LeadCard } from "@/components/leads/LeadCard";
+import { FiltrosLeads } from "@/components/leads/FiltrosLeads";
+import { format } from "date-fns";
 
 export default function Leads() {
   const { leads, addLead, updateLead, deleteLead } = useData();
   const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [viewingLead, setViewingLead] = useState<Lead | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
+  const [filtrosLocais, setFiltrosLocais] = useState({
+    busca: "",
+    status: "all"
+  });
   const [formData, setFormData] = useState<Partial<Lead>>({});
 
   const canEdit = isAdmin;
@@ -55,6 +65,20 @@ export default function Leads() {
       toast.success("Lead excluído com sucesso!");
     }
   };
+
+  const handleView = (lead: Lead) => {
+    setViewingLead(lead);
+    setIsViewDialogOpen(true);
+  };
+
+  // Filtrar leads localmente
+  const leadsFiltrados = leads.filter(lead => {
+    const matchBusca = !filtrosLocais.busca || 
+      lead.nome.toLowerCase().includes(filtrosLocais.busca.toLowerCase());
+    const matchStatus = filtrosLocais.status === "all" || lead.status === filtrosLocais.status;
+    
+    return matchBusca && matchStatus;
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,25 +136,65 @@ export default function Leads() {
           <h1 className="text-3xl font-bold">Leads</h1>
           <p className="text-muted-foreground">Gerencie seus leads e oportunidades</p>
         </div>
-        {canEdit && (
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Lead
-          </Button>
-        )}
+        <div className="flex gap-2">
+          <div className="flex gap-1 border rounded-lg p-1">
+            <Button
+              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          {canEdit && (
+            <Button onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Lead
+            </Button>
+          )}
+        </div>
       </div>
 
-      <DataTable
-        data={leads}
-        columns={columns}
-        onEdit={canEdit ? handleEdit : undefined}
-        onDelete={canEdit ? handleDelete : undefined}
-        searchPlaceholder="Buscar leads..."
-        emptyMessage="Nenhum lead cadastrado"
-        canEdit={canEdit}
-        canDelete={canEdit}
+      <FiltrosLeads
+        filtros={filtrosLocais}
+        onFiltrosChange={setFiltrosLocais}
       />
 
+      {viewMode === 'cards' ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {leadsFiltrados.map((lead) => (
+            <LeadCard
+              key={lead.id}
+              lead={lead}
+              onView={() => handleView(lead)}
+              onEdit={canEdit ? () => handleEdit(lead) : undefined}
+              onDelete={canEdit ? () => handleDelete(lead) : undefined}
+              canEdit={canEdit}
+              canDelete={canEdit}
+            />
+          ))}
+        </div>
+      ) : (
+        <DataTable
+          data={leadsFiltrados}
+          columns={columns}
+          onEdit={canEdit ? handleEdit : undefined}
+          onDelete={canEdit ? handleDelete : undefined}
+          searchPlaceholder="Buscar leads..."
+          emptyMessage="Nenhum lead cadastrado"
+          canEdit={canEdit}
+          canDelete={canEdit}
+        />
+      )}
+
+      {/* Dialog de Criação/Edição */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -224,6 +288,58 @@ export default function Leads() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualização */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Lead</DialogTitle>
+            <DialogDescription>Informações completas do lead</DialogDescription>
+          </DialogHeader>
+          {viewingLead && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-muted-foreground">Nome</Label>
+                  <p className="font-semibold">{viewingLead.nome}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Status</Label>
+                  <div className="mt-1">
+                    {getStatusBadge(viewingLead.status)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-muted-foreground">Email</Label>
+                  <p className="font-semibold">{viewingLead.email || "Não informado"}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Telefone</Label>
+                  <p className="font-semibold">{viewingLead.telefone || "Não informado"}</p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Interesse</Label>
+                <p className="font-semibold">{viewingLead.interesse || "Não informado"}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Observações</Label>
+                <p className="font-semibold whitespace-pre-wrap">{viewingLead.observacoes || "Nenhuma observação"}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Data de Cadastro</Label>
+                <p className="font-semibold">{format(new Date(viewingLead.created_at), "dd/MM/yyyy HH:mm")}</p>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
