@@ -56,7 +56,7 @@ export default function Servicos() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.titulo_servico || !formData.cliente_id || !formData.maquina_id || !formData.valor) {
+    if (!formData.titulo_servico || !formData.cliente_id || !formData.maquina_id || !formData.valor || !formData.data_inicio || !formData.data_fim) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
@@ -167,81 +167,138 @@ export default function Servicos() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="cliente_id">Cliente *</Label>
+              <Select
+                value={formData.cliente_id}
+                onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientes.map((cliente) => (
+                    <SelectItem key={cliente.id} value={cliente.id}>
+                      {cliente.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="maquina_id">Máquina/Categoria *</Label>
+              <Select
+                value={formData.maquina_id}
+                onValueChange={(value) => setFormData({ ...formData, maquina_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma máquina" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categorias.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.nome_maquina}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="titulo_servico">Título do Serviço *</Label>
               <Input
                 id="titulo_servico"
+                placeholder="Ex: Aluguel betoneira - Obra Zona Sul"
                 value={formData.titulo_servico || ""}
                 onChange={(e) => setFormData({ ...formData, titulo_servico: e.target.value })}
                 required
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="cliente_id">Cliente *</Label>
-                <Select
-                  value={formData.cliente_id}
-                  onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clientes.map((cliente) => (
-                      <SelectItem key={cliente.id} value={cliente.id}>
-                        {cliente.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="maquina_id">Máquina *</Label>
-                <Select
-                  value={formData.maquina_id}
-                  onValueChange={(value) => setFormData({ ...formData, maquina_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma máquina" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categorias.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.nome_maquina}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="descricao">Descrição</Label>
               <Textarea
                 id="descricao"
+                placeholder="Descreva os detalhes do serviço"
                 value={formData.descricao || ""}
                 onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                rows={2}
+                rows={4}
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="valor">Valor (R$) *</Label>
+                <Label htmlFor="valor">Valor *</Label>
                 <Input
                   id="valor"
                   type="number"
                   step="0.01"
                   min="0"
+                  placeholder="0"
                   value={formData.valor || ""}
                   onChange={(e) => setFormData({ ...formData, valor: parseFloat(e.target.value) })}
                   required
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value: any) => setFormData({ ...formData, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="concluido">Concluído</SelectItem>
+                    <SelectItem value="cancelado">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="status_cobranca">Status Cobrança</Label>
+                <Select
+                  value={formData.status_cobranca}
+                  onValueChange={(value: any) => setFormData({ ...formData, status_cobranca: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="a_receber">A Receber</SelectItem>
+                    <SelectItem value="pago">Pago</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
+                <Select
+                  value={formData.forma_pagamento}
+                  onValueChange={(value: any) => setFormData({ ...formData, forma_pagamento: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="a_receber">A Receber</SelectItem>
+                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="cartao">Cartão</SelectItem>
+                    <SelectItem value="boleto">Boleto</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="data_inicio">Data Início *</Label>
                 <Input
@@ -265,67 +322,14 @@ export default function Servicos() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value: any) => setFormData({ ...formData, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="concluido">Concluído</SelectItem>
-                    <SelectItem value="cancelado">Cancelado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status_cobranca">Status Cobrança</Label>
-                <Select
-                  value={formData.status_cobranca}
-                  onValueChange={(value: any) => setFormData({ ...formData, status_cobranca: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="a_receber">A Receber</SelectItem>
-                    <SelectItem value="pago">Pago</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="forma_pagamento">Forma Pagamento</Label>
-                <Select
-                  value={formData.forma_pagamento}
-                  onValueChange={(value: any) => setFormData({ ...formData, forma_pagamento: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="a_receber">A Receber</SelectItem>
-                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                    <SelectItem value="pix">PIX</SelectItem>
-                    <SelectItem value="cartao">Cartão</SelectItem>
-                    <SelectItem value="boleto">Boleto</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="observacoes">Observações</Label>
               <Textarea
                 id="observacoes"
+                placeholder="Observações adicionais"
                 value={formData.observacoes || ""}
                 onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                rows={2}
+                rows={3}
               />
             </div>
 
