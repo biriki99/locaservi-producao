@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Grid, List, Eye } from "lucide-react";
+import { Plus, Grid, List, Eye, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Cliente } from "@/types";
 import { ClienteCard } from "@/components/clientes/ClienteCard";
@@ -27,9 +27,28 @@ export default function Clientes() {
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [viewingCliente, setViewingCliente] = useState<Cliente | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Partial<Cliente>>({});
 
   const canEdit = isAdmin;
+
+  // Ordenar clientes alfabeticamente
+  const clientesOrdenados = [...clientes].sort((a, b) => 
+    a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
+  );
+
+  // Filtrar por busca
+  const clientesFiltrados = clientesOrdenados.filter((cliente) => {
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      cliente.nome.toLowerCase().includes(searchLower) ||
+      cliente.email?.toLowerCase().includes(searchLower) ||
+      cliente.telefone?.toLowerCase().includes(searchLower) ||
+      cliente.cpf_cnpj?.toLowerCase().includes(searchLower) ||
+      cliente.endereco?.toLowerCase().includes(searchLower)
+    );
+  });
 
   const handleCreate = () => {
     if (!canEdit) return;
@@ -129,9 +148,31 @@ export default function Clientes() {
         </div>
       </div>
 
+      {/* Campo de busca */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, email, telefone, CPF/CNPJ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        {searchTerm && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSearchTerm("")}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
       {viewMode === 'cards' ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {clientes.map((cliente) => (
+          {clientesFiltrados.map((cliente) => (
             <ClienteCard
               key={cliente.id}
               cliente={cliente}
@@ -145,7 +186,7 @@ export default function Clientes() {
         </div>
       ) : (
         <DataTable
-          data={clientes}
+          data={clientesFiltrados}
           columns={columns}
           onEdit={canEdit ? handleEdit : undefined}
           onDelete={canEdit ? handleDelete : undefined}
