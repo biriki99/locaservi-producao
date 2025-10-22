@@ -26,7 +26,7 @@ import { Servico } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { FiltrosServicos } from "@/components/servicos/FiltrosServicos";
 import { ServicoCard } from "@/components/servicos/ServicoCard";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export default function Servicos() {
   const { servicos, clientes, categorias, addServico, updateServico, deleteServico } = useData();
@@ -515,11 +515,11 @@ export default function Servicos() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label className="text-sm font-semibold text-muted-foreground">Data Início</Label>
-                  <p className="text-base">{format(new Date(viewingServico.data_inicio), "dd/MM/yyyy")}</p>
+                  <p className="text-base">{format(parseISO(viewingServico.data_inicio), "dd/MM/yyyy")}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-semibold text-muted-foreground">Data Fim</Label>
-                  <p className="text-base">{format(new Date(viewingServico.data_fim), "dd/MM/yyyy")}</p>
+                  <p className="text-base">{format(parseISO(viewingServico.data_fim), "dd/MM/yyyy")}</p>
                 </div>
               </div>
 

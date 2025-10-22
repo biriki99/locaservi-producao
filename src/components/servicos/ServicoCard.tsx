@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Pencil, Trash } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface ServicoCardProps {
   servico: Servico;
@@ -71,7 +71,7 @@ export const ServicoCard = ({
           
           {/* Período */}
           <p className="text-sm text-muted-foreground mb-3">
-            {format(new Date(servico.data_inicio), "dd/MM/yyyy")} até {format(new Date(servico.data_fim), "dd/MM/yyyy")}
+            {format(parseISO(servico.data_inicio), "dd/MM/yyyy")} até {format(parseISO(servico.data_fim), "dd/MM/yyyy")}
           </p>
           
           {/* Badges */}
