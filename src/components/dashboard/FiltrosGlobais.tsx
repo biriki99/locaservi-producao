@@ -87,11 +87,13 @@ export const FiltrosGlobais = () => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todas as categorias</SelectItem>
-          {categorias.map((cat) => (
-            <SelectItem key={cat.id} value={cat.id}>
-              {cat.nome_maquina}
-            </SelectItem>
-          ))}
+          {[...categorias]
+            .sort((a, b) => a.nome_maquina.localeCompare(b.nome_maquina))
+            .map((cat) => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.nome_maquina}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
 
@@ -104,11 +106,13 @@ export const FiltrosGlobais = () => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos os clientes</SelectItem>
-          {clientes.map((cliente) => (
-            <SelectItem key={cliente.id} value={cliente.id}>
-              {cliente.nome}
-            </SelectItem>
-          ))}
+          {[...clientes]
+            .sort((a, b) => a.nome.localeCompare(b.nome))
+            .map((cliente) => (
+              <SelectItem key={cliente.id} value={cliente.id}>
+                {cliente.nome}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
 

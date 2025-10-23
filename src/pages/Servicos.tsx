@@ -302,11 +302,13 @@ export default function Servicos() {
                   <SelectValue placeholder="Selecione um cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clientes.map((cliente) => (
-                    <SelectItem key={cliente.id} value={cliente.id}>
-                      {cliente.nome}
-                    </SelectItem>
-                  ))}
+                  {[...clientes]
+                    .sort((a, b) => a.nome.localeCompare(b.nome))
+                    .map((cliente) => (
+                      <SelectItem key={cliente.id} value={cliente.id}>
+                        {cliente.nome}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -321,11 +323,13 @@ export default function Servicos() {
                   <SelectValue placeholder="Selecione uma máquina" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categorias.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.nome_maquina}
-                    </SelectItem>
-                  ))}
+                  {[...categorias]
+                    .sort((a, b) => a.nome_maquina.localeCompare(b.nome_maquina))
+                    .map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.nome_maquina}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

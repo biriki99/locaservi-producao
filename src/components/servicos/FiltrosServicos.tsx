@@ -45,11 +45,13 @@ export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes }: FiltrosS
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os clientes</SelectItem>
-            {clientes.map((cliente) => (
-              <SelectItem key={cliente.id} value={cliente.id}>
-                {cliente.nome}
-              </SelectItem>
-            ))}
+            {[...clientes]
+              .sort((a, b) => a.nome.localeCompare(b.nome))
+              .map((cliente) => (
+                <SelectItem key={cliente.id} value={cliente.id}>
+                  {cliente.nome}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>
