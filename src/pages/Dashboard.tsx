@@ -92,9 +92,9 @@ export default function Dashboard() {
     const mes = String(i + 1).padStart(2, '0');
     const valor = servicos
       .filter(s => {
-        const dataInicio = new Date(s.data_inicio);
-        return String(dataInicio.getMonth() + 1).padStart(2, '0') === mes &&
-               String(dataInicio.getFullYear()) === filtros.ano;
+        const dataFim = new Date(s.data_fim);
+        return String(dataFim.getMonth() + 1).padStart(2, '0') === mes &&
+               String(dataFim.getFullYear()) === filtros.ano;
       })
       .reduce((sum, s) => sum + s.valor, 0);
     
@@ -108,9 +108,9 @@ export default function Dashboard() {
   const pagoAReceberPorMes = Array.from({ length: 12 }, (_, i) => {
     const mes = String(i + 1).padStart(2, '0');
     const servicosMes = servicos.filter(s => {
-      const dataInicio = new Date(s.data_inicio);
-      return String(dataInicio.getMonth() + 1).padStart(2, '0') === mes &&
-             String(dataInicio.getFullYear()) === filtros.ano;
+      const dataFim = new Date(s.data_fim);
+      return String(dataFim.getMonth() + 1).padStart(2, '0') === mes &&
+             String(dataFim.getFullYear()) === filtros.ano;
     });
     
     const pago = servicosMes.filter(s => s.status_cobranca === "pago").reduce((sum, s) => sum + s.valor, 0);
@@ -132,10 +132,10 @@ export default function Dashboard() {
     
     categorias.forEach(cat => {
       const valor = servicos.filter(s => {
-        const dataInicio = new Date(s.data_inicio);
+        const dataFim = new Date(s.data_fim);
         return s.maquina_id === cat.id &&
-               String(dataInicio.getMonth() + 1).padStart(2, '0') === mes &&
-               String(dataInicio.getFullYear()) === filtros.ano;
+               String(dataFim.getMonth() + 1).padStart(2, '0') === mes &&
+               String(dataFim.getFullYear()) === filtros.ano;
       }).reduce((sum, s) => sum + s.valor, 0);
       
       dadosMes[cat.nome_maquina] = valor;
