@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { LeadCard } from "@/components/leads/LeadCard";
 import { FiltrosLeads } from "@/components/leads/FiltrosLeads";
 import { format } from "date-fns";
+import { leadSchema } from "@/lib/validations";
 
 export default function Leads() {
   const { leads, addLead, updateLead, deleteLead } = useData();
@@ -83,21 +84,31 @@ export default function Leads() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nome || !formData.telefone || !formData.interesse) {
-      toast.error("Preencha todos os campos obrigatórios");
+    // Prepare data for validation
+    const dataToValidate = {
+      ...formData,
+      status: formData.status || "novo",
+    };
+
+    // Validate form data with zod
+    const result = leadSchema.safeParse(dataToValidate);
+    
+    if (!result.success) {
+      const firstError = result.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
     if (editingLead) {
-      updateLead(editingLead.id, formData);
+      updateLead(editingLead.id, result.data);
     } else {
       await addLead({
-        nome: formData.nome!,
-        telefone: formData.telefone!,
-        email: formData.email || "",
-        interesse: formData.interesse!,
-        status: formData.status || "novo",
-        observacoes: formData.observacoes || ""
+        nome: result.data.nome,
+        telefone: result.data.telefone,
+        email: result.data.email || "",
+        interesse: result.data.interesse,
+        status: result.data.status || "novo",
+        observacoes: result.data.observacoes || ""
       });
     }
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { loginSchema, signupSchema } from "@/lib/validations";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -31,42 +32,64 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    try {
+      // Validate login data with zod
+      const result = loginSchema.safeParse({ email, password });
+      
+      if (!result.success) {
+        const firstError = result.error.errors[0];
+        toast.error(firstError.message);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
+      const { error } = await signIn(result.data.email, result.data.password);
+
+      if (error) {
+        toast.error(error.message || "Erro ao fazer login");
+      } else {
+        toast.success("Login realizado com sucesso!");
+      }
+    } catch (error: any) {
       toast.error(error.message || "Erro ao fazer login");
-    } else {
-      toast.success("Login realizado com sucesso!");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!nome.trim()) {
-      toast.error("Por favor, informe seu nome");
-      return;
-    }
-
     setLoading(true);
 
-    const { error } = await signUp(email, password, nome);
+    try {
+      // Validate signup data with zod
+      const result = signupSchema.safeParse({ nome, email, password });
+      
+      if (!result.success) {
+        const firstError = result.error.errors[0];
+        toast.error(firstError.message);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
+      const { error } = await signUp(result.data.email, result.data.password, result.data.nome);
+
+      if (error) {
+        toast.error(error.message || "Erro ao criar conta");
+      } else {
+        toast.success("Conta criada! Aguarde aprovação do administrador.");
+        // Limpar campos
+        setEmail("");
+        setPassword("");
+        setNome("");
+        // Mudar para aba de login
+        setActiveTab("login");
+      }
+    } catch (error: any) {
       toast.error(error.message || "Erro ao criar conta");
-    } else {
-      toast.success("Conta criada! Aguarde aprovação do administrador.");
-      // Limpar campos
-      setEmail("");
-      setPassword("");
-      setNome("");
-      // Mudar para aba de login
-      setActiveTab("login");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

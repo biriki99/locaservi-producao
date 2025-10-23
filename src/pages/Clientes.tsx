@@ -17,6 +17,7 @@ import { Plus, Grid, List, Eye, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Cliente } from "@/types";
 import { ClienteCard } from "@/components/clientes/ClienteCard";
+import { clienteSchema } from "@/lib/validations";
 import { format } from "date-fns";
 
 export default function Clientes() {
@@ -80,27 +81,25 @@ export default function Clientes() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nome?.trim()) {
-      toast.error("O campo Nome é obrigatório");
-      return;
-    }
-
-    // Validar email apenas se preenchido
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error("Email inválido");
+    // Validate form data with zod
+    const result = clienteSchema.safeParse(formData);
+    
+    if (!result.success) {
+      const firstError = result.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
     if (editingCliente) {
-      updateCliente(editingCliente.id, formData);
+      updateCliente(editingCliente.id, result.data);
     } else {
       await addCliente({
-        nome: formData.nome!,
-        telefone: formData.telefone || "",
-        email: formData.email || "",
-        cpf_cnpj: formData.cpf_cnpj || "",
-        endereco: formData.endereco || "",
-        observacoes: formData.observacoes || ""
+        nome: result.data.nome,
+        telefone: result.data.telefone || "",
+        email: result.data.email || "",
+        cpf_cnpj: result.data.cpf_cnpj || "",
+        endereco: result.data.endereco || "",
+        observacoes: result.data.observacoes || ""
       });
     }
 

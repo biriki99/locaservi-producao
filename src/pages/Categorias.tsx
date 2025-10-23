@@ -17,6 +17,7 @@ import { Plus, Grid, List, Eye, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Categoria } from "@/types";
 import { CategoriaCard } from "@/components/categorias/CategoriaCard";
+import { categoriaSchema } from "@/lib/validations";
 import { format } from "date-fns";
 
 export default function Categorias() {
@@ -74,17 +75,21 @@ export default function Categorias() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nome_maquina) {
-      toast.error("Preencha o nome da máquina");
+    // Validate form data with zod
+    const result = categoriaSchema.safeParse(formData);
+    
+    if (!result.success) {
+      const firstError = result.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
     if (editingCategoria) {
-      updateCategoria(editingCategoria.id, formData);
+      updateCategoria(editingCategoria.id, result.data);
     } else {
       await addCategoria({
-        nome_maquina: formData.nome_maquina!,
-        observacao: formData.observacao || ""
+        nome_maquina: result.data.nome_maquina,
+        observacao: result.data.observacao || ""
       });
     }
 

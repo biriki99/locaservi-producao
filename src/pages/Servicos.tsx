@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { FiltrosServicos } from "@/components/servicos/FiltrosServicos";
 import { ServicoCard } from "@/components/servicos/ServicoCard";
 import { format, parseISO } from "date-fns";
+import { servicoSchema } from "@/lib/validations";
 
 export default function Servicos() {
   const { servicos, clientes, categorias, addServico, updateServico, deleteServico } = useData();
@@ -98,37 +99,49 @@ export default function Servicos() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validar apenas campos essenciais
-    if (!formData.cliente_id || !formData.maquina_id || !formData.data_inicio || !formData.data_fim) {
-      toast.error("Preencha todos os campos obrigatórios (Cliente, Máquina, Datas)");
+    // Prepare data for validation
+    const dataToValidate = {
+      ...formData,
+      valor: typeof formData.valor === 'string' ? parseFloat(formData.valor) : (formData.valor ?? 0),
+      status: formData.status || "pendente",
+      status_cobranca: formData.status_cobranca || "a_receber",
+      forma_pagamento: formData.forma_pagamento || "a_receber",
+    };
+
+    // Validate form data with zod
+    const result = servicoSchema.safeParse(dataToValidate);
+    
+    if (!result.success) {
+      const firstError = result.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
     // Gerar título se não foi preenchido
-    let titulo = formData.titulo_servico;
-    if (!titulo && formData.maquina_id) {
-      const categoriaSelecionada = categorias.find(c => c.id === formData.maquina_id);
+    let titulo = result.data.titulo_servico;
+    if (!titulo && result.data.maquina_id) {
+      const categoriaSelecionada = categorias.find(c => c.id === result.data.maquina_id);
       titulo = categoriaSelecionada ? `Aluguel ${categoriaSelecionada.nome_maquina}` : "Serviço";
     }
 
     if (editingServico) {
       updateServico(editingServico.id, {
-        ...formData,
-        titulo_servico: titulo || formData.titulo_servico
+        ...result.data,
+        titulo_servico: titulo || result.data.titulo_servico
       });
     } else {
       await addServico({
-        cliente_id: formData.cliente_id!,
-        maquina_id: formData.maquina_id!,
+        cliente_id: result.data.cliente_id,
+        maquina_id: result.data.maquina_id,
         titulo_servico: titulo || "Serviço",
-        descricao: formData.descricao || "",
-        valor: formData.valor ?? 0,
-        status: formData.status || "pendente",
-        status_cobranca: formData.status_cobranca || "a_receber",
-        forma_pagamento: formData.forma_pagamento || "a_receber",
-        data_inicio: formData.data_inicio!,
-        data_fim: formData.data_fim!,
-        observacoes: formData.observacoes || ""
+        descricao: result.data.descricao || "",
+        valor: result.data.valor,
+        status: result.data.status,
+        status_cobranca: result.data.status_cobranca,
+        forma_pagamento: result.data.forma_pagamento,
+        data_inicio: result.data.data_inicio,
+        data_fim: result.data.data_fim,
+        observacoes: result.data.observacoes || ""
       });
     }
 
