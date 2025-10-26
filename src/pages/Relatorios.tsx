@@ -302,6 +302,8 @@ const Relatorios = () => {
               labelsColunas={labelsColunas}
               nomeArquivo={`relatorio-${tipoRelatorio}-${new Date().toISOString().split('T')[0]}`}
               titulo={`Relatório de ${tipoRelatorio.charAt(0).toUpperCase() + tipoRelatorio.slice(1)}`}
+              mostrarTotal={totalValor !== undefined}
+              totalValor={totalValor}
             />
           </div>
 

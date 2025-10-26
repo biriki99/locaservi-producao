@@ -8,19 +8,29 @@ interface Props {
   labelsColunas: Record<string, string>;
   nomeArquivo: string;
   titulo: string;
+  mostrarTotal?: boolean;
+  totalValor?: number;
 }
 
-export const ExportButtons = ({ dados, colunas, labelsColunas, nomeArquivo, titulo }: Props) => {
+export const ExportButtons = ({ 
+  dados, 
+  colunas, 
+  labelsColunas, 
+  nomeArquivo, 
+  titulo,
+  mostrarTotal,
+  totalValor
+}: Props) => {
   const handleExportCSV = () => {
-    exportToCSV(dados, colunas, labelsColunas, nomeArquivo);
+    exportToCSV(dados, colunas, labelsColunas, nomeArquivo, mostrarTotal, totalValor);
   };
 
   const handleExportExcel = () => {
-    exportToExcel(dados, colunas, labelsColunas, nomeArquivo);
+    exportToExcel(dados, colunas, labelsColunas, nomeArquivo, mostrarTotal, totalValor);
   };
 
   const handleExportPDF = () => {
-    exportToPDF(dados, colunas, labelsColunas, nomeArquivo, titulo);
+    exportToPDF(dados, colunas, labelsColunas, nomeArquivo, titulo, mostrarTotal, totalValor);
   };
 
   if (dados.length === 0) {
