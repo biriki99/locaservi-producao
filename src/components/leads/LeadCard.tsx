@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Pencil, Trash, Mail, Phone, Lightbulb } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LeadCardProps {
   lead: Lead;
@@ -34,6 +35,9 @@ export const LeadCard = ({
   canEdit, 
   canDelete 
 }: LeadCardProps) => {
+  const { user, isAdmin } = useAuth();
+  const podeEditar = isAdmin || lead.user_id === user?.id;
+  
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start gap-3">
@@ -86,12 +90,12 @@ export const LeadCard = ({
                 <Eye className="h-4 w-4" />
               </Button>
             )}
-            {canEdit && onEdit && (
+            {canEdit && podeEditar && onEdit && (
               <Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
                 <Pencil className="h-4 w-4" />
               </Button>
             )}
-            {canDelete && onDelete && (
+            {canDelete && podeEditar && onDelete && (
               <Button variant="ghost" size="icon" onClick={onDelete} title="Excluir">
                 <Trash className="h-4 w-4" />
               </Button>

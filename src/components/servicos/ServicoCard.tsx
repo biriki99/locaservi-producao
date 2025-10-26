@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Pencil, Trash } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ServicoCardProps {
   servico: Servico;
@@ -48,6 +49,9 @@ export const ServicoCard = ({
   canEdit, 
   canDelete 
 }: ServicoCardProps) => {
+  const { user, isAdmin } = useAuth();
+  const podeEditar = isAdmin || servico.user_id === user?.id;
+  
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start gap-3">
@@ -94,12 +98,12 @@ export const ServicoCard = ({
                 <Eye className="h-4 w-4" />
               </Button>
             )}
-            {canEdit && onEdit && (
+            {canEdit && podeEditar && onEdit && (
               <Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
                 <Pencil className="h-4 w-4" />
               </Button>
             )}
-            {canDelete && onDelete && (
+            {canDelete && podeEditar && onDelete && (
               <Button variant="ghost" size="icon" onClick={onDelete} title="Excluir">
                 <Trash className="h-4 w-4" />
               </Button>

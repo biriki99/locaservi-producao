@@ -2,6 +2,7 @@ import { Categoria } from "@/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, Pencil, Trash, Settings } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CategoriaCardProps {
   categoria: Categoria;
@@ -20,6 +21,9 @@ export const CategoriaCard = ({
   canEdit, 
   canDelete 
 }: CategoriaCardProps) => {
+  const { user, isAdmin } = useAuth();
+  const podeEditar = isAdmin || categoria.user_id === user?.id;
+  
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start gap-3">
@@ -50,12 +54,12 @@ export const CategoriaCard = ({
                 <Eye className="h-4 w-4" />
               </Button>
             )}
-            {canEdit && onEdit && (
+            {canEdit && podeEditar && onEdit && (
               <Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
                 <Pencil className="h-4 w-4" />
               </Button>
             )}
-            {canDelete && onDelete && (
+            {canDelete && podeEditar && onDelete && (
               <Button variant="ghost" size="icon" onClick={onDelete} title="Excluir">
                 <Trash className="h-4 w-4" />
               </Button>
