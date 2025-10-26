@@ -25,6 +25,15 @@ export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTo
       return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
     }
     if (coluna.includes('data') && valor) {
+      const dateStr = valor.toString().split('T')[0]; // Remove hora se existir
+      const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      
+      if (match) {
+        const [, ano, mes, dia] = match;
+        return `${dia}/${mes}/${ano}`;
+      }
+      
+      // Fallback
       return new Date(valor).toLocaleDateString('pt-BR');
     }
     return valor || '-';

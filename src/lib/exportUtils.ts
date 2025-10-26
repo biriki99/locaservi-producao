@@ -1,7 +1,16 @@
 const formatarData = (valor: any): string => {
   if (!valor) return '';
-  const data = new Date(valor);
-  return data.toLocaleDateString('pt-BR');
+  
+  const dateStr = valor.toString().split('T')[0]; // Remove hora se existir
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  
+  if (match) {
+    const [, ano, mes, dia] = match;
+    return `${dia}/${mes}/${ano}`;
+  }
+  
+  // Fallback
+  return new Date(valor).toLocaleDateString('pt-BR');
 };
 
 const formatarValorExportacao = (valor: any, coluna: string): string => {
