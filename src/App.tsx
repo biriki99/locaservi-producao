@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "./pages/Login";
 import Pendente from "./pages/Pendente";
+import Inativo from "./pages/Inativo";
 import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import Categorias from "./pages/Categorias";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/pendente" element={<Pendente />} />
+              <Route path="/inativo" element={<Inativo />} />
               
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />

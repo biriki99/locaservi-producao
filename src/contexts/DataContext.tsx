@@ -374,18 +374,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteUsuario = async (id: string) => {
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', id);
+    try {
+      // Chamar Edge Function para deletar usuário
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId: id }
+      });
 
-    if (profileError) {
+      if (error) {
+        console.error('Erro ao deletar usuário:', error);
+        toast.error('Erro ao deletar usuário');
+        throw error;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
+        throw new Error(data.error);
+      }
+
+      toast.success('Usuário deletado com sucesso');
+      await fetchUsuarios();
+    } catch (error) {
+      console.error('Erro ao deletar usuário:', error);
       toast.error('Erro ao deletar usuário');
-      throw profileError;
+      throw error;
     }
-
-    toast.success('Usuário deletado com sucesso');
-    await fetchUsuarios();
   };
 
   const inactivateUsuario = async (id: string, status: 'ativo' | 'inativo') => {

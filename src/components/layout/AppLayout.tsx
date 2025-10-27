@@ -4,7 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const AppLayout = () => {
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, userStatus, loading } = useAuth();
   const location = useLocation();
 
   // Rotas permitidas para usuário comum
@@ -23,6 +23,10 @@ export const AppLayout = () => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (userStatus === "inativo") {
+    return <Navigate to="/inativo" replace />;
   }
 
   if (userRole === "nenhum") {

@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null;
   userRole: UserRole | null;
   userName: string | null;
+  userStatus: 'ativo' | 'pendente' | 'inativo' | null;
   loading: boolean;
   signUp: (email: string, password: string, nome: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -23,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userStatus, setUserStatus] = useState<'ativo' | 'pendente' | 'inativo' | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setUserRole(null);
           setUserName(null);
+          setUserStatus(null);
         }
         
         setLoading(false);
@@ -83,17 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (profileData) {
         setUserName(profileData.nome);
-        
-        // Verificar se usuário está inativo e fazer logout
-        if (profileData.status === 'inativo') {
-          await supabase.auth.signOut();
-          toast.error('Sua conta foi desativada. Entre em contato com o administrador.');
-          setUser(null);
-          setSession(null);
-          setUserRole(null);
-          setUserName(null);
-          return;
-        }
+        setUserStatus(profileData.status || 'ativo');
       }
     } catch (error) {
       console.error('Erro ao buscar dados do usuário:', error);
@@ -132,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
     setUserRole(null);
     setUserName(null);
+    setUserStatus(null);
   };
 
   const isAdmin = userRole === 'admin';
@@ -143,6 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session, 
         userRole, 
         userName,
+        userStatus,
         loading, 
         signUp, 
         signIn, 
