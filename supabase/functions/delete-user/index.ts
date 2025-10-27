@@ -84,8 +84,9 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Erro na edge function:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
     return new Response(
-      JSON.stringify({ error: 'Erro interno do servidor: ' + error.message }),
+      JSON.stringify({ error: 'Erro interno do servidor: ' + errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

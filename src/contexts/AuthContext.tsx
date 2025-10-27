@@ -86,7 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (profileData) {
         setUserName(profileData.nome);
-        setUserStatus(profileData.status || 'ativo');
+        const status = profileData.status as 'ativo' | 'pendente' | 'inativo';
+        setUserStatus(status || 'ativo');
       }
     } catch (error) {
       console.error('Erro ao buscar dados do usuário:', error);
