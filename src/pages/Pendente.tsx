@@ -44,7 +44,7 @@ export default function Pendente() {
 
         <div className="mt-6 rounded-lg bg-muted p-4">
           <p className="text-xs text-muted-foreground">
-            Se você acredita que isso é um erro, entre em contato com o suporte em contato@crm.com.br
+            Se você acredita que isso é um erro, entre em contato com o suporte em contato@locaservi.com.br
           </p>
         </div>
       </Card>

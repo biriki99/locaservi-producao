@@ -429,7 +429,7 @@ export const mockLeads: Lead[] = [
 export const mockUsuarios: Usuario[] = [
   {
     id: "user-123",
-    email: "admin@crm.com.br",
+    email: "admin@locaservi.com.br",
     nome: "Administrador Sistema",
     role: "admin",
     status: "ativo",
@@ -437,7 +437,7 @@ export const mockUsuarios: Usuario[] = [
   },
   {
     id: "user-456",
-    email: "usuario@crm.com.br",
+    email: "usuario@locaservi.com.br",
     nome: "Usuário Comum",
     role: "user_comum",
     status: "ativo",
@@ -445,7 +445,7 @@ export const mockUsuarios: Usuario[] = [
   },
   {
     id: "user-789",
-    email: "pendente@crm.com.br",
+    email: "pendente@locaservi.com.br",
     nome: "Usuário Pendente",
     role: "nenhum",
     status: "pendente",
@@ -453,7 +453,7 @@ export const mockUsuarios: Usuario[] = [
   },
   {
     id: "user-101",
-    email: "joao.silva@crm.com.br",
+    email: "joao.silva@locaservi.com.br",
     nome: "João Silva",
     role: "user_comum",
     status: "ativo",
@@ -461,7 +461,7 @@ export const mockUsuarios: Usuario[] = [
   },
   {
     id: "user-102",
-    email: "maria.santos@crm.com.br",
+    email: "maria.santos@locaservi.com.br",
     nome: "Maria Santos",
     role: "nenhum",
     status: "pendente",

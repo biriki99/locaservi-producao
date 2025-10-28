@@ -44,7 +44,7 @@ export default function Inativo() {
 
         <div className="mt-6 rounded-lg bg-muted p-4">
           <p className="text-xs text-muted-foreground">
-            Para solicitar a reativação da sua conta, entre em contato em contato@crm.com.br
+            Para solicitar a reativação da sua conta, entre em contato em contato@locaservi.com.br
           </p>
         </div>
       </Card>
