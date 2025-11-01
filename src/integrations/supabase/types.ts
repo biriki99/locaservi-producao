@@ -14,16 +14,225 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categorias: {
+        Row: {
+          created_at: string
+          id: string
+          nome_maquina: string
+          observacao: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome_maquina: string
+          observacao?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome_maquina?: string
+          observacao?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      clientes: {
+        Row: {
+          cpf_cnpj: string
+          created_at: string
+          email: string
+          endereco: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          telefone: string
+          user_id: string
+        }
+        Insert: {
+          cpf_cnpj: string
+          created_at?: string
+          email: string
+          endereco?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          telefone: string
+          user_id: string
+        }
+        Update: {
+          cpf_cnpj?: string
+          created_at?: string
+          email?: string
+          endereco?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          telefone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          interesse: string | null
+          nome: string
+          observacoes: string | null
+          status: string
+          telefone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          interesse?: string | null
+          nome: string
+          observacoes?: string | null
+          status?: string
+          telefone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          interesse?: string | null
+          nome?: string
+          observacoes?: string | null
+          status?: string
+          telefone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          nome: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      servicos: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          data_fim: string | null
+          data_inicio: string
+          descricao: string | null
+          forma_pagamento: string
+          id: string
+          maquina_id: string
+          observacoes: string | null
+          status: string
+          status_cobranca: string
+          titulo_servico: string
+          user_id: string
+          valor: number | null
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          data_fim?: string | null
+          data_inicio: string
+          descricao?: string | null
+          forma_pagamento?: string
+          id?: string
+          maquina_id: string
+          observacoes?: string | null
+          status?: string
+          status_cobranca?: string
+          titulo_servico: string
+          user_id: string
+          valor?: number | null
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          forma_pagamento?: string
+          id?: string
+          maquina_id?: string
+          observacoes?: string | null
+          status?: string
+          status_cobranca?: string
+          titulo_servico?: string
+          user_id?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicos_maquina_id_fkey"
+            columns: ["maquina_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user_comum" | "nenhum"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +359,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user_comum", "nenhum"],
+    },
   },
 } as const
