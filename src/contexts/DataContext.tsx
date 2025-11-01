@@ -117,7 +117,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    setServicos(data || []);
+    setServicos((data || []) as Servico[]);
   };
 
   const fetchLeads = async () => {
@@ -131,7 +131,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    setLeads(data || []);
+    setLeads((data || []) as Lead[]);
   };
 
   const fetchUsuarios = async () => {
