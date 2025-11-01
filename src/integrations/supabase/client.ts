@@ -2,8 +2,16 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://gcbethgkkjxvcjxdojoa.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYmV0aGdra2p4dmNqeGRvam9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4NTI4OTcsImV4cCI6MjA3NzQyODg5N30.GduNIFJ4_xxm9qHu10LIVbABroD-H9jYVREE27US_zc";
+// Detectar ambiente e escolher as credenciais corretas
+const isProduction = import.meta.env.MODE === 'production';
+
+const SUPABASE_URL = isProduction
+  ? (import.meta.env.VITE_SUPABASE_URL_PROD || "https://gcbethgkkjxvcjxdojoa.supabase.co")
+  : (import.meta.env.VITE_SUPABASE_URL_DEV || "https://gcbethgkkjxvcjxdojoa.supabase.co");
+
+const SUPABASE_PUBLISHABLE_KEY = isProduction
+  ? (import.meta.env.VITE_SUPABASE_ANON_KEY_PROD || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYmV0aGdra2p4dmNqeGRvam9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4NTI4OTcsImV4cCI6MjA3NzQyODg5N30.GduNIFJ4_xxm9qHu10LIVbABroD-H9jYVREE27US_zc")
+  : (import.meta.env.VITE_SUPABASE_ANON_KEY_DEV || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYmV0aGdra2p4dmNqeGRvam9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4NTI4OTcsImV4cCI6MjA3NzQyODg5N30.GduNIFJ4_xxm9qHu10LIVbABroD-H9jYVREE27US_zc");
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
