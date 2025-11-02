@@ -1,19 +1,29 @@
-name: Manual Mirror to Production
+name: Espelhar manualmente para produção
 
 on:
-  workflow_dispatch: # execução manual
+  workflow_dispatch: # Executa apenas quando você mandar manualmente
+
 jobs:
   mirror:
+    name: Espelhar para locaservi-producao
     runs-on: ubuntu-latest
 
+    # Permissão de escrita para o bot fazer push
     permissions:
       contents: write
 
     steps:
-      - name: Checkout código
+      - name: Checkout do repositório de origem (A)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Pega o histórico completo, necessário para o espelhamento
 
-      - name: Adicionar remoto de produção
+      - name: Adicionar remoto de destino (B)
         run: |
+          echo "Adicionando remoto do repositório B..."
           git remote add mirror https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/biriki99/locaservi-producao.git
+
+      - name: Espelhar código e branches
+        run: |
+          echo "Enviando todos os branches e tags para o repositório B..."
           git push --mirror mirror
