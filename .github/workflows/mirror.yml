@@ -21,7 +21,7 @@ jobs:
       - name: Adicionar remoto de destino (B)
         run: |
           echo "Adicionando remoto do repositório B..."
-          git remote add mirror https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/biriki99/locaservi-producao.git
+          git remote add mirror https://x-access-token:${{MIRROR_TOKEN}}@github.com/biriki99/locaservi-producao.git
 
       - name: Espelhar código e branches
         run: |
