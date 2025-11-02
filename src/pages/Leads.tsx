@@ -3,23 +3,11 @@ import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { DataTable } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Grid, List, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Lead } from "@/types";
@@ -36,10 +24,10 @@ export default function Leads() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [viewingLead, setViewingLead] = useState<Lead | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
+  const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
   const [filtrosLocais, setFiltrosLocais] = useState({
     busca: "",
-    status: "all"
+    status: "all",
   });
   const [formData, setFormData] = useState<Partial<Lead>>({});
 
@@ -73,11 +61,10 @@ export default function Leads() {
   };
 
   // Filtrar leads localmente
-  const leadsFiltrados = leads.filter(lead => {
-    const matchBusca = !filtrosLocais.busca || 
-      lead.nome.toLowerCase().includes(filtrosLocais.busca.toLowerCase());
+  const leadsFiltrados = leads.filter((lead) => {
+    const matchBusca = !filtrosLocais.busca || lead.nome.toLowerCase().includes(filtrosLocais.busca.toLowerCase());
     const matchStatus = filtrosLocais.status === "all" || lead.status === filtrosLocais.status;
-    
+
     return matchBusca && matchStatus;
   });
 
@@ -92,7 +79,7 @@ export default function Leads() {
 
     // Validate form data with zod
     const result = leadSchema.safeParse(dataToValidate);
-    
+
     if (!result.success) {
       const firstError = result.error.errors[0];
       toast.error(firstError.message);
@@ -108,7 +95,7 @@ export default function Leads() {
         email: result.data.email || "",
         interesse: result.data.interesse,
         status: result.data.status || "novo",
-        observacoes: result.data.observacoes || ""
+        observacoes: result.data.observacoes || "",
       });
     }
 
@@ -122,9 +109,9 @@ export default function Leads() {
       contato_feito: { label: "Contato Feito", className: "bg-secondary text-secondary-foreground" },
       negociacao: { label: "Negociação", className: "bg-warning text-warning-foreground" },
       convertido: { label: "Convertido", className: "bg-success text-success-foreground" },
-      perdido: { label: "Perdido", className: "bg-destructive text-destructive-foreground" }
+      perdido: { label: "Perdido", className: "bg-destructive text-destructive-foreground" },
     };
-    
+
     const { label, className } = config[status as keyof typeof config] || config.novo;
     return <Badge className={className}>{label}</Badge>;
   };
@@ -134,9 +121,9 @@ export default function Leads() {
     { header: "Telefone", accessor: "telefone" as keyof Lead },
     { header: "Email", accessor: "email" as keyof Lead },
     { header: "Interesse", accessor: "interesse" as keyof Lead },
-    { 
-      header: "Status", 
-      accessor: ((item: Lead) => getStatusBadge(item.status)) as any
+    {
+      header: "Status",
+      accessor: ((item: Lead) => getStatusBadge(item.status)) as any,
     },
   ];
 
@@ -144,22 +131,22 @@ export default function Leads() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Leads</h1>
+          <h1 className="text-3xl font-bold">Leads teste</h1>
           <p className="text-muted-foreground">Gerencie seus leads e oportunidades</p>
         </div>
         <div className="flex gap-2">
           <div className="flex gap-1 border rounded-lg p-1">
             <Button
-              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+              variant={viewMode === "cards" ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setViewMode('cards')}
+              onClick={() => setViewMode("cards")}
             >
               <Grid className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              variant={viewMode === "table" ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setViewMode('table')}
+              onClick={() => setViewMode("table")}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -173,12 +160,9 @@ export default function Leads() {
         </div>
       </div>
 
-      <FiltrosLeads
-        filtros={filtrosLocais}
-        onFiltrosChange={setFiltrosLocais}
-      />
+      <FiltrosLeads filtros={filtrosLocais} onFiltrosChange={setFiltrosLocais} />
 
-      {viewMode === 'cards' ? (
+      {viewMode === "cards" ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {leadsFiltrados.map((lead) => (
             <LeadCard
@@ -209,12 +193,8 @@ export default function Leads() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>
-              {editingLead ? "Editar Lead" : "Novo Lead"}
-            </DialogTitle>
-            <DialogDescription>
-              Preencha os dados do lead abaixo
-            </DialogDescription>
+            <DialogTitle>{editingLead ? "Editar Lead" : "Novo Lead"}</DialogTitle>
+            <DialogDescription>Preencha os dados do lead abaixo</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -294,9 +274,7 @@ export default function Leads() {
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                {editingLead ? "Salvar" : "Criar"}
-              </Button>
+              <Button type="submit">{editingLead ? "Salvar" : "Criar"}</Button>
             </div>
           </form>
         </DialogContent>
@@ -318,9 +296,7 @@ export default function Leads() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
-                  <div className="mt-1">
-                    {getStatusBadge(viewingLead.status)}
-                  </div>
+                  <div className="mt-1">{getStatusBadge(viewingLead.status)}</div>
                 </div>
               </div>
 
