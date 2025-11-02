@@ -6,6 +6,8 @@ on:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # <-- adiciona permissão de gravação
     steps:
       - name: Checkout repositório A
         uses: actions/checkout@v4
@@ -17,6 +19,7 @@ jobs:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: |
           git remote add mirror https://x-access-token:${MIRROR_TOKEN}@github.com/biriki99/locaservi-producao.git
+
       - name: Espelhar tudo para o repositório B
         run: |
           git push --mirror mirror
