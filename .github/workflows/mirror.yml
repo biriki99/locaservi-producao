@@ -1,0 +1,19 @@
+name: Manual Mirror to Production
+
+on:
+  workflow_dispatch: # execução manual
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Adicionar remoto de produção
+        run: |
+          git remote add mirror https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/biriki99/locaservi-producao.git
+          git push --mirror mirror
