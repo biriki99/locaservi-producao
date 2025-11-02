@@ -1,25 +1,32 @@
-name: Manual Mirror to Repo B
+name: Manual Mirror to locaservi-producao
 
 on:
-  workflow_dispatch:  # permite rodar manualmente
+  workflow_dispatch:  # executado manualmente
+
+permissions:
+  contents: write
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # <-- adiciona permissão de gravação
+
     steps:
       - name: Checkout repositório A
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # pega todas as branches e tags
 
-      - name: Configurar acesso ao repositório B
+      - name: Configurar repositório B como destino
         env:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: |
+          git remote remove mirror 2>/dev/null || true
           git remote add mirror https://x-access-token:${MIRROR_TOKEN}@github.com/biriki99/locaservi-producao.git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Espelhar tudo para o repositório B
         run: |
+          echo "Enviando espelho para biriki99/locaservi-producao..."
           git push --mirror mirror
+          echo "✅ Espelhamento concluído com sucesso!"
