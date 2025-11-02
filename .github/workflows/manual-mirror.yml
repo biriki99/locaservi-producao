@@ -16,8 +16,7 @@ jobs:
         env:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: |
-          git remote add mirror https://x-access-token:${MIRROR_TOKEN}@github.com/biriki99/locaservi-producao
-
+          git remote add mirror https://x-access-token:${MIRROR_TOKEN}@github.com/biriki99/locaservi-producao.git
       - name: Espelhar tudo para o repositório B
         run: |
           git push --mirror mirror
