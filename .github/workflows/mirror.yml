@@ -18,6 +18,11 @@ jobs:
         with:
           fetch-depth: 0  # Pega o histórico completo, necessário para o espelhamento
 
+      - name: Configurar usuário Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
 #git remote add mirror https://x-access-token:${{secrets.MIRROR_TOKEN}}@github.com/biriki99/locaservi-producao.git
       - name: Adicionar remoto de destino (B)
         run: |
