@@ -131,7 +131,7 @@ export default function Leads() {
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Leads teste 2</h1>
+          <h1 className="text-3xl font-bold">Leads teste 2025</h1>
           <p className="text-muted-foreground">Gerencie seus leads e oportunidades</p>
         </div>
         <div className="flex gap-2">
