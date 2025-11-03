@@ -90,11 +90,11 @@ export default function Dashboard() {
   // Dados para gráfico de linha (faturamento por mês)
   const faturamentoPorMes = Array.from({ length: 12 }, (_, i) => {
     const mes = String(i + 1).padStart(2, '0');
+    const anoMes = `${filtros.ano}-${mes}`;
     const valor = servicos
       .filter(s => {
-        const dataFim = new Date(s.data_fim);
-        return String(dataFim.getMonth() + 1).padStart(2, '0') === mes &&
-               String(dataFim.getFullYear()) === filtros.ano;
+        const dataFimAnoMes = s.data_fim.substring(0, 7);
+        return dataFimAnoMes === anoMes;
       })
       .reduce((sum, s) => sum + s.valor, 0);
     
@@ -107,10 +107,10 @@ export default function Dashboard() {
   // Dados para gráfico de barras (pago x a receber por mês)
   const pagoAReceberPorMes = Array.from({ length: 12 }, (_, i) => {
     const mes = String(i + 1).padStart(2, '0');
+    const anoMes = `${filtros.ano}-${mes}`;
     const servicosMes = servicos.filter(s => {
-      const dataFim = new Date(s.data_fim);
-      return String(dataFim.getMonth() + 1).padStart(2, '0') === mes &&
-             String(dataFim.getFullYear()) === filtros.ano;
+      const dataFimAnoMes = s.data_fim.substring(0, 7);
+      return dataFimAnoMes === anoMes;
     });
     
     const pago = servicosMes.filter(s => s.status_cobranca === "pago").reduce((sum, s) => sum + s.valor, 0);
@@ -128,14 +128,13 @@ export default function Dashboard() {
   // Dados para gráfico de linhas (faturamento de cada categoria por mês)
   const faturamentoCategoriasPorMes = Array.from({ length: 12 }, (_, i) => {
     const mes = String(i + 1).padStart(2, '0');
+    const anoMes = `${filtros.ano}-${mes}`;
     const dadosMes: any = { mes: mesesNomes[i] };
     
     categorias.forEach(cat => {
       const valor = servicos.filter(s => {
-        const dataFim = new Date(s.data_fim);
-        return s.maquina_id === cat.id &&
-               String(dataFim.getMonth() + 1).padStart(2, '0') === mes &&
-               String(dataFim.getFullYear()) === filtros.ano;
+        const dataFimAnoMes = s.data_fim.substring(0, 7);
+        return s.maquina_id === cat.id && dataFimAnoMes === anoMes;
       }).reduce((sum, s) => sum + s.valor, 0);
       
       dadosMes[cat.nome_maquina] = valor;
