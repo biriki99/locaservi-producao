@@ -1,0 +1,36 @@
+name: Espelhar manualmente via SSH
+
+on:
+  workflow_dispatch: # Executa apenas manualmente
+
+jobs:
+  mirror:
+    name: Espelhar para produção
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório de origem
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar chave SSH
+        run: |
+          echo "🔐 Configurando chave SSH..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MIRROR_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          echo "✅ Chave SSH configurada com sucesso!"
+
+      - name: Adicionar remoto do repositório B
+        run: |
+          echo "🔗 Adicionando remoto do repositório de destino..."
+          git remote add mirror git@github.com:biriki99/locaservi-producao.git
+          git remote -v
+
+      - name: Espelhar código e histórico
+        run: |
+          echo "🚀 Enviando todos os branches e tags para o repositório de produção..."
+          git push --mirror mirror
+          echo "✅ Espelhamento concluído com sucesso!"
