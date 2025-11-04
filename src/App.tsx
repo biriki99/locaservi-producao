@@ -19,6 +19,7 @@ import Leads from "./pages/Leads";
 import Usuarios from "./pages/Usuarios";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
+import AlertasServicos from "./pages/AlertasServicos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/clientes" element={<Clientes />} />
                 <Route path="/categorias" element={<Categorias />} />
                 <Route path="/servicos" element={<Servicos />} />
+                <Route path="/alertas" element={<AlertasServicos />} />
                 <Route path="/leads" element={<Leads />} />
                 <Route path="/relatorios" element={<Relatorios />} />
                 <Route path="/usuarios" element={<Usuarios />} />
