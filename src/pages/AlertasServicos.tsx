@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Search } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInDays, startOfDay } from "date-fns";
 import { Servico } from "@/types";
 
 export default function AlertasServicos() {
@@ -23,16 +23,10 @@ export default function AlertasServicos() {
 
   // Função para calcular dias restantes
   const calcularDiasRestantes = (dataFim: string): number => {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
+    const hoje = startOfDay(new Date());
+    const fim = startOfDay(parseISO(dataFim));
     
-    const fim = new Date(dataFim);
-    fim.setHours(0, 0, 0, 0);
-    
-    const diffTime = fim.getTime() - hoje.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays;
+    return differenceInDays(fim, hoje);
   };
 
   // Função para obter status do prazo
