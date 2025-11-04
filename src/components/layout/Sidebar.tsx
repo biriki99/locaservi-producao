@@ -7,9 +7,12 @@ import {
   MessageSquare,
   FileBarChart,
   UserCog,
-  Settings
+  Settings,
+  AlertCircle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useData } from "@/contexts/DataContext";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -17,6 +20,7 @@ const navigation = [
   { name: "Clientes", href: "/clientes", icon: Users, roles: ["admin", "user_comum"] },
   { name: "Categorias", href: "/categorias", icon: Package, roles: ["admin"] },
   { name: "Serviços", href: "/servicos", icon: Wrench, roles: ["admin", "user_comum"] },
+  { name: "Alertas", href: "/alertas", icon: AlertCircle, roles: ["admin", "user_comum"], hasBadge: true },
   { name: "Leads", href: "/leads", icon: MessageSquare, roles: ["admin", "user_comum"] },
   { name: "Relatórios", href: "/relatorios", icon: FileBarChart, roles: ["admin", "user_comum"] },
   { name: "Usuários", href: "/usuarios", icon: UserCog, roles: ["admin"] },
@@ -25,6 +29,17 @@ const navigation = [
 
 export const Sidebar = () => {
   const { userRole } = useAuth();
+  const { servicos } = useData();
+
+  // Calcular serviços atrasados
+  const servicosAtrasados = servicos.filter(s => {
+    if (s.status !== 'pendente') return false;
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const fim = new Date(s.data_fim);
+    fim.setHours(0, 0, 0, 0);
+    return fim < hoje;
+  }).length;
 
   const visibleNavigation = navigation.filter(item => 
     item.roles.includes(userRole || "nenhum")
@@ -39,6 +54,8 @@ export const Sidebar = () => {
       <nav className="flex-1 space-y-1 p-4">
         {visibleNavigation.map((item) => {
           const Icon = item.icon;
+          const showBadge = item.hasBadge && servicosAtrasados > 0;
+          
           return (
             <NavLink
               key={item.name}
@@ -54,6 +71,11 @@ export const Sidebar = () => {
             >
               <Icon className="h-5 w-5" />
               {item.name}
+              {showBadge && (
+                <Badge variant="destructive" className="ml-auto">
+                  {servicosAtrasados}
+                </Badge>
+              )}
             </NavLink>
           );
         })}
