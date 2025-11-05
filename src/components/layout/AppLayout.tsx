@@ -24,6 +24,14 @@ export const AppLayout = () => {
     }
   }, [isMobile]);
 
+  // IMPORTANTE: Calcular padding ANTES de qualquer retorno condicional
+  const mainPadding = useMemo(() => {
+    if (isMobile) return '';
+    if (sidebarState === 'open') return 'pl-64';
+    if (sidebarState === 'mini') return 'pl-16';
+    return '';
+  }, [isMobile, sidebarState]);
+
   // Rotas permitidas para usuário comum
   const commonUserRoutes = ["/dashboard", "/clientes", "/leads", "/servicos", "/alertas", "/relatorios", "/configuracoes"];
   
@@ -54,14 +62,6 @@ export const AppLayout = () => {
   if (userRole === "user_comum" && !commonUserRoutes.includes(location.pathname)) {
     return <Navigate to="/dashboard" replace />;
   }
-
-  // Calcular padding do conteúdo baseado no estado da sidebar
-  const mainPadding = useMemo(() => {
-    if (isMobile) return '';
-    if (sidebarState === 'open') return 'pl-64';
-    if (sidebarState === 'mini') return 'pl-16';
-    return '';
-  }, [isMobile, sidebarState]);
 
   const handleSidebarToggle = () => {
     if (isMobile) {
