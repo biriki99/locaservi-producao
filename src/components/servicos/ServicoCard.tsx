@@ -53,28 +53,28 @@ export const ServicoCard = ({
   const podeEditar = isAdmin || servico.user_id === user?.id;
   
   return (
-    <Card className="p-4 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
+    <Card className="p-4 hover:shadow-lg transition-shadow overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="flex-1 min-w-0 space-y-3">
           {/* Título */}
-          <h3 className="text-lg font-bold mb-1 truncate">{servico.titulo_servico}</h3>
+          <h3 className="text-lg font-bold truncate">{servico.titulo_servico}</h3>
           
           {/* Descrição */}
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2">
             {servico.descricao || "Sem descrição"}
           </p>
           
           {/* Cliente e Máquina */}
-          <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted-foreground">Cliente:</span>
-            <span className="font-semibold">{cliente?.nome || "N/A"}</span>
+            <span className="font-semibold truncate">{cliente?.nome || "N/A"}</span>
             <span className="text-muted-foreground">•</span>
             <span className="text-muted-foreground">Máquina:</span>
-            <span className="font-semibold">{categoria?.nome_maquina || "N/A"}</span>
+            <span className="font-semibold truncate">{categoria?.nome_maquina || "N/A"}</span>
           </div>
           
           {/* Período */}
-          <p className="text-sm text-muted-foreground mb-3">
+          <p className="text-sm text-muted-foreground">
             {format(parseISO(servico.data_inicio), "dd/MM/yyyy")} até {format(parseISO(servico.data_fim), "dd/MM/yyyy")}
           </p>
           
@@ -86,26 +86,44 @@ export const ServicoCard = ({
         </div>
         
         {/* Valor e Ações */}
-        <div className="flex flex-col items-end gap-3">
-          <p className="text-2xl font-bold whitespace-nowrap">
+        <div className="flex sm:flex-col items-center sm:items-end gap-3">
+          <p className="text-xl sm:text-2xl font-bold whitespace-nowrap flex-1 sm:flex-initial">
             R$ {servico.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
           
           {/* Ações */}
           <div className="flex gap-1">
             {onView && (
-              <Button variant="ghost" size="icon" onClick={onView} title="Visualizar">
-                <Eye className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onView} 
+                title="Visualizar"
+                className="h-11 w-11 sm:h-9 sm:w-9 touch-target"
+              >
+                <Eye className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             )}
             {canEdit && podeEditar && onEdit && (
-              <Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
-                <Pencil className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onEdit} 
+                title="Editar"
+                className="h-11 w-11 sm:h-9 sm:w-9 touch-target"
+              >
+                <Pencil className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             )}
             {canDelete && podeEditar && onDelete && (
-              <Button variant="ghost" size="icon" onClick={onDelete} title="Excluir">
-                <Trash className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onDelete} 
+                title="Excluir"
+                className="h-11 w-11 sm:h-9 sm:w-9 touch-target"
+              >
+                <Trash className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             )}
           </div>
