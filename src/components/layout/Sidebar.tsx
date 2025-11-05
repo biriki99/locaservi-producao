@@ -27,11 +27,15 @@ const navigation = [
   { name: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin", "user_comum"] }
 ];
 
+type SidebarState = 'open' | 'mini' | 'closed';
+
 interface SidebarProps {
+  state: SidebarState;
   onClose?: () => void;
+  isMobile: boolean;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile }) => {
   const { userRole } = useAuth();
   const { servicos } = useData();
 
@@ -49,13 +53,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     item.roles.includes(userRole || "nenhum")
   );
 
+  const showText = state === 'open';
+  const sidebarWidth = state === 'open' ? 'w-64' : state === 'mini' ? 'w-16' : 'w-0';
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r bg-sidebar">
-      <div className="flex h-16 items-center border-b px-6">
-        <span className="text-lg font-semibold text-sidebar-foreground">Navegação</span>
-      </div>
+    <aside 
+      className={cn(
+        "fixed inset-y-0 left-0 flex flex-col border-r bg-sidebar transition-all duration-300 overflow-hidden",
+        sidebarWidth,
+        isMobile && state === 'closed' && '-translate-x-full',
+        isMobile ? 'z-40' : 'z-10'
+      )}
+    >
+      {/* Header - apenas visível quando está aberta */}
+      {state === 'open' && (
+        <div className="flex h-16 items-center border-b px-6 flex-shrink-0">
+          <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
+        </div>
+      )}
       
-      <nav className="flex-1 space-y-1 p-4">
+      {/* Espaçador quando está mini */}
+      {state === 'mini' && <div className="h-16 flex-shrink-0" />}
+      
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 p-2 overflow-y-auto no-scrollbar">
         {visibleNavigation.map((item) => {
           const Icon = item.icon;
           const showBadge = item.hasBadge && servicosAtrasados > 0;
@@ -65,19 +86,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
               key={item.name}
               to={item.href}
               onClick={onClose}
+              title={!showText ? item.name : undefined}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all min-h-[44px] touch-target",
                   isActive
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  !showText && "justify-center"
                 )
               }
             >
-              <Icon className="h-5 w-5" />
-              {item.name}
-              {showBadge && (
-                <Badge variant="destructive" className="ml-auto">
+              <Icon className="h-5 w-5 flex-shrink-0" />
+              {showText && (
+                <>
+                  <span className="flex-1 truncate">{item.name}</span>
+                  {showBadge && (
+                    <Badge variant="destructive" className="ml-auto">
+                      {servicosAtrasados}
+                    </Badge>
+                  )}
+                </>
+              )}
+              {!showText && showBadge && (
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
                   {servicosAtrasados}
                 </Badge>
               )}
@@ -86,13 +118,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         })}
       </nav>
       
-      <div className="border-t p-4">
-        <div className="rounded-lg bg-primary/10 p-3">
-          <p className="text-xs text-primary">
-            CRM conectado ao Supabase
-          </p>
+      {/* Footer - apenas quando aberta */}
+      {state === 'open' && (
+        <div className="border-t p-4 flex-shrink-0">
+          <div className="rounded-lg bg-primary/10 p-3">
+            <p className="text-xs text-primary">
+              CRM conectado ao Supabase
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 };

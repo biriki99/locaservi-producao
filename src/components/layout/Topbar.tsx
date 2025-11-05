@@ -1,15 +1,17 @@
-import { LogOut, User, Menu } from "lucide-react";
+import { LogOut, User, Menu, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+type SidebarState = 'open' | 'mini' | 'closed';
+
 interface TopbarProps {
-  onMenuClick?: () => void;
-  showMenuButton?: boolean;
+  onMenuToggle?: () => void;
+  sidebarState?: SidebarState;
 }
 
-export const Topbar: React.FC<TopbarProps> = ({ onMenuClick, showMenuButton }) => {
+export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState }) => {
   const {
     user,
     userName,
@@ -39,43 +41,56 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick, showMenuButton }) =
     return badges[role as keyof typeof badges] || badges.nenhum;
   };
   const badge = userRole ? getRoleBadge(userRole) : null;
-  return <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6">
-      <div className="flex flex-1 items-center gap-4">
-        {showMenuButton && (
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={onMenuClick}
-            className="md:hidden"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
+  
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 md:px-6">
+      {/* Toggle button - sempre visível */}
+      <Button 
+        variant="ghost" 
+        size="icon"
+        onClick={onMenuToggle}
+        className="flex-shrink-0"
+        title={sidebarState === 'open' ? 'Minimizar menu' : 'Expandir menu'}
+      >
+        {sidebarState === 'open' ? (
+          <ChevronLeft className="h-5 w-5" />
+        ) : (
+          <Menu className="h-5 w-5" />
         )}
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground px-[40px]">
-            <span className="text-sm font-bold">LocaServi</span>
-          </div>
-          <span className="text-lg font-semibold">Sistema de Gestão</span>
+      </Button>
+      
+      {/* Logo e título */}
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground flex-shrink-0">
+          <span className="text-sm font-bold">LS</span>
         </div>
+        <span className="text-lg font-semibold truncate">
+          LocaServi
+          <span className="hidden md:inline"> - Sistema de Gestão</span>
+        </span>
       </div>
 
-      <div className="flex items-center gap-4">
-        {user && <DropdownMenu>
+      {/* User menu */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {user && (
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative h-10 w-10">
                 <User className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{userName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
+                  <p className="text-sm font-medium leading-none truncate">{userName}</p>
+                  <p className="text-xs leading-none text-muted-foreground truncate">
                     {user?.email}
                   </p>
-                  {badge && <span className={`mt-1 inline-flex w-fit rounded-full px-2 py-0.5 text-xs ${badge.className}`}>
+                  {badge && (
+                    <span className={`mt-1 inline-flex w-fit rounded-full px-2 py-0.5 text-xs ${badge.className}`}>
                       {badge.label}
-                    </span>}
+                    </span>
+                  )}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -84,7 +99,9 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick, showMenuButton }) =
                 <span>Sair</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>}
+          </DropdownMenu>
+        )}
       </div>
-    </header>;
+    </header>
+  );
 };

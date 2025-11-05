@@ -29,13 +29,13 @@ export const KPICard = ({
   };
 
   return (
-    <Card className={cn("p-6 card-shadow hover-lift", variantStyles[variant])}>
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
+    <Card className={cn("p-4 sm:p-6 card-shadow hover-lift overflow-hidden", variantStyles[variant])}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2 flex-1 min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-xl sm:text-2xl font-bold truncate">{value}</p>
           {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{subtitle}</p>
           )}
           {trend && (
             <div className={cn(
@@ -48,12 +48,12 @@ export const KPICard = ({
           )}
         </div>
         <div className={cn(
-          "rounded-lg p-3",
+          "rounded-lg p-2 sm:p-3 flex-shrink-0",
           variant === "success" && "bg-success/10 text-success",
           variant === "warning" && "bg-warning/10 text-warning",
           variant === "default" && "bg-primary/10 text-primary"
         )}>
-          <Icon className="h-6 w-6" />
+          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
       </div>
     </Card>

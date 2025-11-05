@@ -160,14 +160,14 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 animate-in">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Visão geral do seu negócio</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Visão geral do seu negócio</p>
       </div>
 
       <FiltrosGlobais />
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <KPICard
           title="Total em Aluguéis"
           value={`R$ ${totalAluguel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
@@ -198,14 +198,14 @@ export default function Dashboard() {
       </div>
 
       {/* Gráficos - Linha 1 */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Faturamento por Mês</CardTitle>
-            <CardDescription>Receita mensal de {filtros.ano}</CardDescription>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg sm:text-xl">Faturamento por Mês</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Receita mensal de {filtros.ano}</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="px-2 sm:px-6">
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={faturamentoPorMes}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />
@@ -231,13 +231,13 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Pago x A Receber por Mês</CardTitle>
-            <CardDescription>Comparativo mensal de {filtros.ano}</CardDescription>
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg sm:text-xl">Pago x A Receber por Mês</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Comparativo mensal de {filtros.ano}</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="px-2 sm:px-6">
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={pagoAReceberPorMes}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />
@@ -260,14 +260,14 @@ export default function Dashboard() {
       </div>
 
       {/* Gráficos - Linha 2 */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pago x A Receber - Total</CardTitle>
-            <CardDescription>Distribuição geral</CardDescription>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg sm:text-xl">Pago x A Receber - Total</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Distribuição geral</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="px-2 sm:px-6">
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
                   data={pagoAReceberTotal}
@@ -296,13 +296,13 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Faturamento por Categoria</CardTitle>
-            <CardDescription>Distribuição do faturamento total</CardDescription>
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg sm:text-xl">Faturamento por Categoria</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Distribuição do faturamento total</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="px-2 sm:px-6">
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
                   data={faturamentoAnualPorCategoria}
@@ -333,13 +333,13 @@ export default function Dashboard() {
       </div>
 
       {/* Gráfico - Linha 3 (Full Width) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Faturamento por Categoria e Mês</CardTitle>
-          <CardDescription>Evolução mensal do faturamento de cada categoria em {filtros.ano}</CardDescription>
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg sm:text-xl">Faturamento por Categoria e Mês</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Evolução mensal do faturamento de cada categoria em {filtros.ano}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
+        <CardContent className="px-2 sm:px-6">
+          <ResponsiveContainer width="100%" height={300}>
             <LineChart data={faturamentoCategoriasPorMes}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />

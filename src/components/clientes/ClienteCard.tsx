@@ -44,21 +44,21 @@ export const ClienteCard = ({
   const podeEditar = isAdmin || cliente.user_id === user?.id;
   
   return (
-    <Card className="p-4 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
+    <Card className="p-4 hover:shadow-lg transition-shadow overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="flex-1 min-w-0 space-y-3">
           {/* Nome */}
-          <h3 className="text-lg font-bold mb-1 truncate">{cliente.nome}</h3>
+          <h3 className="text-lg font-bold truncate">{cliente.nome}</h3>
           
           {/* Tipo de Pessoa */}
           {cliente.cpf_cnpj && (
-            <div className="mb-3">
+            <div>
               {getTipoBadge(cliente.cpf_cnpj)}
             </div>
           )}
           
           {/* Contato */}
-          <div className="space-y-2 mb-3">
+          <div className="space-y-2">
             {cliente.email && (
               <div className="flex items-center gap-2 text-sm">
                 <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -88,21 +88,39 @@ export const ClienteCard = ({
         </div>
         
         {/* Ações */}
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex sm:flex-col items-center sm:items-end gap-2">
           <div className="flex gap-1">
             {onView && (
-              <Button variant="ghost" size="icon" onClick={onView} title="Visualizar">
-                <Eye className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onView} 
+                title="Visualizar"
+                className="h-11 w-11 sm:h-9 sm:w-9 touch-target"
+              >
+                <Eye className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             )}
             {canEdit && podeEditar && onEdit && (
-              <Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
-                <Pencil className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onEdit} 
+                title="Editar"
+                className="h-11 w-11 sm:h-9 sm:w-9 touch-target"
+              >
+                <Pencil className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             )}
             {canDelete && podeEditar && onDelete && (
-              <Button variant="ghost" size="icon" onClick={onDelete} title="Excluir">
-                <Trash className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onDelete} 
+                title="Excluir"
+                className="h-11 w-11 sm:h-9 sm:w-9 touch-target"
+              >
+                <Trash className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             )}
           </div>
