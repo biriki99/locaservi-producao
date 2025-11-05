@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Topbar } from "./Topbar";
 import { Sidebar } from "./Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDeviceType } from "@/hooks/use-device-type";
 
 export const AppLayout = () => {
   const { user, userRole, userStatus, loading } = useAuth();
+  const { isMobile } = useDeviceType();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
   // Rotas permitidas para usuário comum
@@ -40,10 +44,28 @@ export const AppLayout = () => {
 
   return (
     <div className="flex min-h-screen w-full">
-      <Sidebar />
-      <div className="flex flex-1 flex-col pl-64">
-        <Topbar />
-        <main className="flex-1 p-6">
+      {/* Overlay para mobile */}
+      {isMobile && sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar com lógica mobile */}
+      <div className={`
+        ${isMobile ? 'fixed z-50 transition-transform' : 'relative'}
+        ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
+      `}>
+        <Sidebar onClose={() => setSidebarOpen(false)} />
+      </div>
+
+      <div className={`flex flex-1 flex-col ${!isMobile && 'pl-64'}`}>
+        <Topbar 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          showMenuButton={isMobile}
+        />
+        <main className="flex-1 p-4 md:p-6">
           <Outlet />
         </main>
       </div>
