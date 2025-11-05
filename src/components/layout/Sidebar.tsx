@@ -27,7 +27,11 @@ const navigation = [
   { name: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin", "user_comum"] }
 ];
 
-export const Sidebar = () => {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { userRole } = useAuth();
   const { servicos } = useData();
 
@@ -60,6 +64,7 @@ export const Sidebar = () => {
             <NavLink
               key={item.name}
               to={item.href}
+              onClick={onClose}
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",

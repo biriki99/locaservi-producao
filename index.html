@@ -6,7 +6,12 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="apple-mobile-web-app-title" content="Locaservi" />
+    <meta name="theme-color" content="#0066ff" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/pwa-512x512.png" />
     <title>LocaServi - Sistema de Gestão</title>
     <meta name="description" content="Sistema de gestão para aluguel de máquinas e serviços" />
     <meta name="author" content="Lovable" />
@@ -26,7 +31,71 @@
   </head>
 
   <body>
+    <style>
+      #splash-screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(to bottom, hsl(215 100% 50% / 0.1), hsl(0 0% 100%));
+        z-index: 9999;
+      }
+      
+      #splash-screen .logo {
+        width: 120px;
+        height: 120px;
+        background: hsl(215 100% 50%);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 24px;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      
+      #splash-screen .loading {
+        color: hsl(0 0% 40%);
+        font-size: 16px;
+      }
+
+      .dark #splash-screen {
+        background: linear-gradient(to bottom, hsl(215 100% 50% / 0.1), hsl(222 47% 11%));
+      }
+
+      .dark #splash-screen .loading {
+        color: hsl(0 0% 60%);
+      }
+    </style>
+    
+    <div id="splash-screen">
+      <div class="logo">LS</div>
+      <div class="loading">Carregando...</div>
+    </div>
+    
     <div id="root"></div>
+    
+    <script>
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.style.opacity = '0';
+            splash.style.transition = 'opacity 0.5s';
+            setTimeout(() => splash.remove(), 500);
+          }
+        }, 1000);
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

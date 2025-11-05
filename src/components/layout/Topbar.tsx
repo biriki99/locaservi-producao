@@ -1,9 +1,15 @@
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-export const Topbar = () => {
+
+interface TopbarProps {
+  onMenuClick?: () => void;
+  showMenuButton?: boolean;
+}
+
+export const Topbar: React.FC<TopbarProps> = ({ onMenuClick, showMenuButton }) => {
   const {
     user,
     userName,
@@ -33,8 +39,18 @@ export const Topbar = () => {
     return badges[role as keyof typeof badges] || badges.nenhum;
   };
   const badge = userRole ? getRoleBadge(userRole) : null;
-  return <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-card px-6">
+  return <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6">
       <div className="flex flex-1 items-center gap-4">
+        {showMenuButton && (
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={onMenuClick}
+            className="md:hidden"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        )}
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground px-[40px]">
             <span className="text-sm font-bold">LocaServi</span>
