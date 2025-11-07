@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Topbar } from "./Topbar";
 import { Sidebar } from "./Sidebar";
@@ -25,15 +25,24 @@ export const AppLayout = () => {
     return false;
   });
 
+  // Referência para detectar mudança de dispositivo
+  const prevIsMobileRef = useRef(isMobile);
+
   // Ajustar estado da sidebar quando o tamanho da tela muda
   useEffect(() => {
-    if (isMobile && sidebarState === 'open') {
+    const prevIsMobile = prevIsMobileRef.current;
+    
+    // Apenas fecha quando MUDA de desktop para mobile (resize)
+    if (!prevIsMobile && isMobile && sidebarState === 'open') {
       setSidebarState('closed');
-    } else if (!isMobile && sidebarPinned && sidebarState !== 'open') {
-      // Se está em desktop e está pinada, força abrir
+    } 
+    // Desktop com sidebar pinada deve estar sempre aberta
+    else if (!isMobile && sidebarPinned && sidebarState !== 'open') {
       setSidebarState('open');
     }
-  }, [isMobile, sidebarPinned, sidebarState]);
+    
+    prevIsMobileRef.current = isMobile;
+  }, [isMobile, sidebarPinned]);
 
   // IMPORTANTE: Calcular padding ANTES de qualquer retorno condicional
   const mainPadding = useMemo(() => {
