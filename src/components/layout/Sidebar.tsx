@@ -89,8 +89,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
         </div>
       )}
       
-      {/* Espaçador quando está mini */}
-      {state === 'mini' && <div className="h-16 flex-shrink-0" />}
+      {/* Espaçador + botão de pin quando está mini */}
+      {state === 'mini' && (
+        <div className="h-16 flex-shrink-0 flex items-center justify-center border-b">
+          {!isMobile && onPinToggle && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onPinToggle}
+              title={isPinned ? "Desfixar menu lateral" : "Fixar menu lateral"}
+              className="h-9 w-9"
+            >
+              <Pin className={cn("h-4 w-4 transition-all", isPinned && "fill-current text-primary")} />
+            </Button>
+          )}
+        </div>
+      )}
       
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-2 overflow-y-auto no-scrollbar">

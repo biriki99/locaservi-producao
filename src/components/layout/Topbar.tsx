@@ -80,7 +80,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState, side
         className="flex-shrink-0"
         title={toggleInfo.title}
       >
-        <ToggleIcon className={`h-5 w-5 ${toggleInfo.className || ''}`} />
+        <ToggleIcon className={`h-5 w-5 transition-all ${toggleInfo.className || ''} ${sidebarPinned && !isMobile ? 'text-primary' : ''}`} />
       </Button>
       
       {/* Logo e título */}

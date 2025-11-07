@@ -123,7 +123,7 @@ export const AppLayout = () => {
           sidebarPinned={sidebarPinned}
           isMobile={isMobile}
         />
-        <main className="flex-1 p-4 md:p-6 pt-16">
+        <main className="flex-1 px-4 md:px-6 pb-4 md:pb-6 pt-16">
           <Outlet />
         </main>
       </div>
