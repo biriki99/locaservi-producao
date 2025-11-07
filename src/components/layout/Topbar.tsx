@@ -1,8 +1,10 @@
 import { LogOut, User, Menu, ChevronLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 type SidebarState = 'open' | 'mini' | 'closed';
 
@@ -71,17 +73,34 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState, side
   const ToggleIcon = toggleInfo.icon;
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 md:px-6">
-      {/* Toggle button - sempre visível */}
-      <Button 
-        variant="ghost" 
-        size="icon"
-        onClick={onMenuToggle}
-        className="flex-shrink-0"
-        title={toggleInfo.title}
-      >
-        <ToggleIcon className={`h-5 w-5 transition-all ${toggleInfo.className || ''} ${sidebarPinned && !isMobile ? 'text-primary' : ''}`} />
-      </Button>
+    <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 md:px-6 shadow-sm">
+      {/* Toggle button com tooltip */}
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={onMenuToggle}
+              disabled={sidebarPinned && !isMobile}
+              className={cn(
+                "flex-shrink-0 transition-all",
+                sidebarPinned && !isMobile && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <ToggleIcon 
+                className={cn(
+                  "h-5 w-5 transition-all",
+                  sidebarPinned && !isMobile && "text-primary"
+                )} 
+              />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p className="text-sm">{toggleInfo.title}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       
       {/* Logo e título */}
       <div className="flex items-center gap-2 flex-1 min-w-0">

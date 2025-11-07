@@ -9,12 +9,14 @@ import {
   UserCog,
   Settings,
   AlertCircle,
-  Pin
+  Pin,
+  PinOff
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -63,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
   return (
     <aside 
       className={cn(
-        "fixed inset-y-0 left-0 flex flex-col border-r bg-sidebar transition-all duration-300 overflow-hidden",
+        "fixed inset-y-0 left-0 flex flex-col border-r bg-sidebar transition-all duration-300 ease-in-out overflow-hidden shadow-lg",
         sidebarWidth,
         isMobile && state === 'closed' && '-translate-x-full',
         isMobile ? 'z-40' : 'z-10'
@@ -71,37 +73,71 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
     >
       {/* Header - apenas visível quando está aberta */}
       {state === 'open' && (
-        <div className="flex h-16 items-center border-b px-4 flex-shrink-0 justify-between">
+        <div className="flex h-16 items-center border-b px-4 flex-shrink-0 justify-between bg-sidebar">
           <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
           
           {/* Botão de pin - apenas em desktop */}
           {!isMobile && onPinToggle && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onPinToggle}
-              title={isPinned ? "Desfixar menu lateral" : "Fixar menu lateral"}
-              className="h-9 w-9 flex-shrink-0"
-            >
-              <Pin className={cn("h-4 w-4 transition-all", isPinned && "fill-current text-primary")} />
-            </Button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onPinToggle}
+                    className={cn(
+                      "h-9 w-9 flex-shrink-0 transition-all hover:bg-sidebar-accent",
+                      isPinned && "bg-primary/10"
+                    )}
+                  >
+                    {isPinned ? (
+                      <Pin className="h-4 w-4 fill-current text-primary" />
+                    ) : (
+                      <PinOff className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p className="text-sm">
+                    {isPinned ? "Desfixar menu (permite minimizar)" : "Fixar menu (sempre visível)"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       )}
       
       {/* Espaçador + botão de pin quando está mini */}
       {state === 'mini' && (
-        <div className="h-16 flex-shrink-0 flex items-center justify-center border-b">
+        <div className="h-16 flex-shrink-0 flex items-center justify-center border-b bg-sidebar">
           {!isMobile && onPinToggle && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onPinToggle}
-              title={isPinned ? "Desfixar menu lateral" : "Fixar menu lateral"}
-              className="h-9 w-9"
-            >
-              <Pin className={cn("h-4 w-4 transition-all", isPinned && "fill-current text-primary")} />
-            </Button>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onPinToggle}
+                    className={cn(
+                      "h-9 w-9 transition-all hover:bg-sidebar-accent",
+                      isPinned && "bg-primary/10"
+                    )}
+                  >
+                    {isPinned ? (
+                      <Pin className="h-4 w-4 fill-current text-primary" />
+                    ) : (
+                      <PinOff className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p className="text-sm">
+                    {isPinned ? "Desfixar menu (permite minimizar)" : "Fixar menu (sempre visível)"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       )}
@@ -151,11 +187,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
       
       {/* Footer - apenas quando aberta */}
       {state === 'open' && (
-        <div className="border-t p-4 flex-shrink-0">
-          <div className="rounded-lg bg-primary/10 p-3">
-            <p className="text-xs text-primary">
+        <div className="border-t p-4 flex-shrink-0 bg-sidebar">
+          <div className="rounded-lg bg-primary/10 p-3 transition-all hover:bg-primary/15">
+            <p className="text-xs text-primary font-medium">
               CRM conectado ao Supabase
             </p>
+            {!isMobile && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {isPinned ? "Menu fixado" : "Clique no pin para fixar"}
+              </p>
+            )}
           </div>
         </div>
       )}
