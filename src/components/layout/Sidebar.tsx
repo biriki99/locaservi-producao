@@ -9,10 +9,9 @@ import {
   FileBarChart,
   UserCog,
   Settings,
-  AlertCircle,
-  Pin,
-  PinOff
+  AlertCircle
 } from "lucide-react";
+import pinIcon from "@/assets/pin-icon.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { Badge } from "@/components/ui/badge";
@@ -105,17 +104,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
                     size="icon"
                     onClick={onPinToggle}
                     className={cn(
-                      "h-10 w-10 flex-shrink-0 transition-all hover:bg-sidebar-accent hover:scale-110",
+                      "h-10 w-10 flex-shrink-0 transition-all hover:bg-sidebar-accent hover:scale-110 group",
                       isPinned 
                         ? "bg-primary/10 border border-primary/20" 
                         : "bg-muted/50 border border-border"
                     )}
                   >
-                    {isPinned ? (
-                      <Pin className="h-5 w-5 fill-current text-primary" />
-                    ) : (
-                      <PinOff className="h-5 w-5 text-muted-foreground" />
-                    )}
+                    <img 
+                      src={pinIcon} 
+                      alt={isPinned ? "Pin fixado" : "Pin não fixado"}
+                      className={cn(
+                        "h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12",
+                        isPinned 
+                          ? "opacity-100 rotate-0 brightness-110" 
+                          : "opacity-60 rotate-45"
+                      )}
+                    />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="right">
@@ -141,17 +145,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
                     size="icon"
                     onClick={onPinToggle}
                     className={cn(
-                      "h-10 w-10 transition-all hover:bg-sidebar-accent hover:scale-110",
+                      "h-10 w-10 transition-all hover:bg-sidebar-accent hover:scale-110 group",
                       isPinned 
                         ? "bg-primary/10 border border-primary/20" 
                         : "bg-muted/50 border border-border"
                     )}
                   >
-                    {isPinned ? (
-                      <Pin className="h-5 w-5 fill-current text-primary" />
-                    ) : (
-                      <PinOff className="h-5 w-5 text-muted-foreground" />
-                    )}
+                    <img 
+                      src={pinIcon} 
+                      alt={isPinned ? "Pin fixado" : "Pin não fixado"}
+                      className={cn(
+                        "h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12",
+                        isPinned 
+                          ? "opacity-100 rotate-0 brightness-110" 
+                          : "opacity-60 rotate-45"
+                      )}
+                    />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="right">
@@ -221,12 +230,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
             >
               {isPinned ? (
                 <>
-                  <Pin className="h-4 w-4 mr-2 fill-current" />
+                  <img 
+                    src={pinIcon} 
+                    alt="Pin fixado"
+                    className="h-4 w-4 mr-2 opacity-100 rotate-0 brightness-110 transition-all duration-300"
+                  />
                   Desfixar Menu
                 </>
               ) : (
                 <>
-                  <PinOff className="h-4 w-4 mr-2" />
+                  <img 
+                    src={pinIcon} 
+                    alt="Pin não fixado"
+                    className="h-4 w-4 mr-2 opacity-60 rotate-45 transition-all duration-300"
+                  />
                   Fixar Menu
                 </>
               )}
