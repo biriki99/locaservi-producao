@@ -17,12 +17,23 @@ export const AppLayout = () => {
     isMobile ? 'closed' : 'open'
   );
 
+  // Estado de "pin" da sidebar (apenas para desktop)
+  const [sidebarPinned, setSidebarPinned] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('sidebar-pinned') === 'true';
+    }
+    return false;
+  });
+
   // Ajustar estado da sidebar quando o tamanho da tela muda
   useEffect(() => {
     if (isMobile && sidebarState === 'open') {
       setSidebarState('closed');
+    } else if (!isMobile && sidebarPinned && sidebarState !== 'open') {
+      // Se está em desktop e está pinada, força abrir
+      setSidebarState('open');
     }
-  }, [isMobile]);
+  }, [isMobile, sidebarPinned, sidebarState]);
 
   // IMPORTANTE: Calcular padding ANTES de qualquer retorno condicional
   const mainPadding = useMemo(() => {
@@ -67,7 +78,21 @@ export const AppLayout = () => {
     if (isMobile) {
       setSidebarState(sidebarState === 'closed' ? 'open' : 'closed');
     } else {
-      setSidebarState(sidebarState === 'open' ? 'mini' : 'open');
+      // Desktop: só permite minimizar se não estiver pinada
+      if (!sidebarPinned) {
+        setSidebarState(sidebarState === 'open' ? 'mini' : 'open');
+      }
+    }
+  };
+
+  const handlePinToggle = () => {
+    const newPinned = !sidebarPinned;
+    setSidebarPinned(newPinned);
+    localStorage.setItem('sidebar-pinned', newPinned.toString());
+    
+    if (newPinned) {
+      // Quando pina, força abrir
+      setSidebarState('open');
     }
   };
 
@@ -86,6 +111,8 @@ export const AppLayout = () => {
         state={sidebarState}
         onClose={() => setSidebarState('closed')}
         isMobile={isMobile}
+        isPinned={sidebarPinned}
+        onPinToggle={handlePinToggle}
       />
 
       {/* Main content */}
@@ -93,8 +120,11 @@ export const AppLayout = () => {
         <Topbar 
           onMenuToggle={handleSidebarToggle}
           sidebarState={sidebarState}
+          sidebarPinned={sidebarPinned}
+          isMobile={isMobile}
+          onPinToggle={handlePinToggle}
         />
-        <main className="flex-1 p-4 md:p-6 pt-20">
+        <main className="flex-1 px-4 md:px-6 pb-4 md:pb-6 pt-16">
           <Outlet />
         </main>
       </div>

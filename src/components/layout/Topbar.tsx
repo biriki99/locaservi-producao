@@ -1,17 +1,23 @@
-import { LogOut, User, Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogOut, User, Menu, ChevronLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import pinIcon from "@/assets/pin-icon.png";
 
 type SidebarState = 'open' | 'mini' | 'closed';
 
 interface TopbarProps {
   onMenuToggle?: () => void;
   sidebarState?: SidebarState;
+  sidebarPinned?: boolean;
+  isMobile?: boolean;
+  onPinToggle?: () => void;
 }
 
-export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState }) => {
+export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState, sidebarPinned = false, isMobile = false, onPinToggle }) => {
   const {
     user,
     userName,
@@ -41,23 +47,99 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState }) =>
     return badges[role as keyof typeof badges] || badges.nenhum;
   };
   const badge = userRole ? getRoleBadge(userRole) : null;
+
+  // Determinar título e ícone do botão toggle
+  const getToggleInfo = () => {
+    if (isMobile) {
+      return {
+        icon: sidebarState === 'open' ? ChevronLeft : Menu,
+        title: sidebarState === 'open' ? 'Fechar menu' : 'Abrir menu'
+      };
+    }
+    
+    if (sidebarPinned) {
+      return {
+        icon: Lock,
+        title: 'Menu fixado - Clique no ícone de pin na barra lateral para desfixar',
+        className: 'text-primary'
+      };
+    }
+    
+    return {
+      icon: sidebarState === 'open' ? ChevronLeft : Menu,
+      title: sidebarState === 'open' ? 'Minimizar menu' : 'Expandir menu'
+    };
+  };
+
+  const toggleInfo = getToggleInfo();
+  const ToggleIcon = toggleInfo.icon;
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 md:px-6">
-      {/* Toggle button - sempre visível */}
-      <Button 
-        variant="ghost" 
-        size="icon"
-        onClick={onMenuToggle}
-        className="flex-shrink-0"
-        title={sidebarState === 'open' ? 'Minimizar menu' : 'Expandir menu'}
-      >
-        {sidebarState === 'open' ? (
-          <ChevronLeft className="h-5 w-5" />
-        ) : (
-          <Menu className="h-5 w-5" />
-        )}
-      </Button>
+    <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 md:px-6 shadow-sm">
+      {/* Toggle button com tooltip */}
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={onMenuToggle}
+              disabled={sidebarPinned && !isMobile}
+              className={cn(
+                "flex-shrink-0 transition-all",
+                sidebarPinned && !isMobile && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <ToggleIcon 
+                className={cn(
+                  "h-5 w-5 transition-all",
+                  sidebarPinned && !isMobile && "text-primary"
+                )} 
+              />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p className="text-sm">{toggleInfo.title}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {/* Botão de Pin - apenas desktop */}
+      {!isMobile && onPinToggle && (
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onPinToggle}
+                className={cn(
+                  "flex-shrink-0 transition-all hover:scale-110 group",
+                  sidebarPinned 
+                    ? "bg-primary/10 border border-primary/20" 
+                    : "bg-muted/50 border border-border"
+                )}
+              >
+                <img 
+                  src={pinIcon} 
+                  alt={sidebarPinned ? "Menu fixado" : "Menu flutuante"}
+                  className={cn(
+                    "h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12",
+                    sidebarPinned 
+                      ? "opacity-100 rotate-0 brightness-110" 
+                      : "opacity-60 rotate-45"
+                  )}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p className="text-sm">
+                {sidebarPinned ? "Desfixar menu (permite minimizar)" : "Fixar menu (sempre visível)"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
       
       {/* Logo e título */}
       <div className="flex items-center gap-2 flex-1 min-w-0">

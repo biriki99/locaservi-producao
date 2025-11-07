@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -10,9 +11,12 @@ import {
   Settings,
   AlertCircle
 } from "lucide-react";
+import pinIcon from "@/assets/pin-icon.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -33,11 +37,24 @@ interface SidebarProps {
   state: SidebarState;
   onClose?: () => void;
   isMobile: boolean;
+  isPinned?: boolean;
+  onPinToggle?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPinned = false, onPinToggle }) => {
   const { userRole } = useAuth();
   const { servicos } = useData();
+
+  // Detecção de largura para garantir botão de pin em desktop
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isDesktopView = windowWidth >= 1024;
 
   // Calcular serviços atrasados
   const servicosAtrasados = servicos.filter(s => {
@@ -59,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile }) =>
   return (
     <aside 
       className={cn(
-        "fixed inset-y-0 left-0 flex flex-col border-r bg-sidebar transition-all duration-300 overflow-hidden",
+        "fixed inset-y-0 left-0 flex flex-col border-r bg-sidebar transition-all duration-300 ease-in-out overflow-hidden shadow-lg",
         sidebarWidth,
         isMobile && state === 'closed' && '-translate-x-full',
         isMobile ? 'z-40' : 'z-10'
@@ -67,13 +84,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile }) =>
     >
       {/* Header - apenas visível quando está aberta */}
       {state === 'open' && (
-        <div className="flex h-16 items-center border-b px-6 flex-shrink-0">
-          <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
+        <div className="flex h-16 items-center border-b px-4 flex-shrink-0 bg-sidebar">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
+            {isDesktopView && (
+              <span className="text-[10px] text-muted-foreground">
+                {isPinned ? "Menu fixado" : "Menu flutuante"}
+              </span>
+            )}
+          </div>
         </div>
       )}
       
-      {/* Espaçador quando está mini */}
-      {state === 'mini' && <div className="h-16 flex-shrink-0" />}
+      {/* Espaçador + botão de pin quando está mini */}
+        {state === 'mini' && (
+          <div className="h-16 flex-shrink-0 border-b bg-sidebar" />
+        )}
       
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-2 overflow-y-auto no-scrollbar">
@@ -120,11 +146,46 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile }) =>
       
       {/* Footer - apenas quando aberta */}
       {state === 'open' && (
-        <div className="border-t p-4 flex-shrink-0">
-          <div className="rounded-lg bg-primary/10 p-3">
-            <p className="text-xs text-primary">
+        <div className="border-t p-4 flex-shrink-0 bg-sidebar space-y-3">
+          {/* Botão alternativo no footer (desktop) */}
+          {isDesktopView && onPinToggle && (
+            <Button
+              onClick={onPinToggle}
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              {isPinned ? (
+                <>
+                  <img 
+                    src={pinIcon} 
+                    alt="Pin fixado"
+                    className="h-4 w-4 mr-2 opacity-100 rotate-0 brightness-110 transition-all duration-300"
+                  />
+                  Desfixar Menu
+                </>
+              ) : (
+                <>
+                  <img 
+                    src={pinIcon} 
+                    alt="Pin não fixado"
+                    className="h-4 w-4 mr-2 opacity-60 rotate-45 transition-all duration-300"
+                  />
+                  Fixar Menu
+                </>
+              )}
+            </Button>
+          )}
+          
+          <div className="rounded-lg bg-primary/10 p-3 transition-all hover:bg-primary/15">
+            <p className="text-xs text-primary font-medium">
               CRM conectado ao Supabase
             </p>
+            {isDesktopView && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {isPinned ? "Menu fixado" : "Menu flutuante"}
+              </p>
+            )}
           </div>
         </div>
       )}
