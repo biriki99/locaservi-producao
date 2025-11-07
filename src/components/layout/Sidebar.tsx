@@ -8,11 +8,13 @@ import {
   FileBarChart,
   UserCog,
   Settings,
-  AlertCircle
+  AlertCircle,
+  Pin
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -33,9 +35,11 @@ interface SidebarProps {
   state: SidebarState;
   onClose?: () => void;
   isMobile: boolean;
+  isPinned?: boolean;
+  onPinToggle?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPinned = false, onPinToggle }) => {
   const { userRole } = useAuth();
   const { servicos } = useData();
 
@@ -67,8 +71,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile }) =>
     >
       {/* Header - apenas visível quando está aberta */}
       {state === 'open' && (
-        <div className="flex h-16 items-center border-b px-6 flex-shrink-0">
+        <div className="flex h-16 items-center border-b px-4 flex-shrink-0 justify-between">
           <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
+          
+          {/* Botão de pin - apenas em desktop */}
+          {!isMobile && onPinToggle && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onPinToggle}
+              title={isPinned ? "Desfixar menu lateral" : "Fixar menu lateral"}
+              className="h-9 w-9 flex-shrink-0"
+            >
+              <Pin className={cn("h-4 w-4 transition-all", isPinned && "fill-current text-primary")} />
+            </Button>
+          )}
         </div>
       )}
       

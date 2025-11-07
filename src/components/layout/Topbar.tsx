@@ -1,4 +1,4 @@
-import { LogOut, User, Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogOut, User, Menu, ChevronLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,9 +9,11 @@ type SidebarState = 'open' | 'mini' | 'closed';
 interface TopbarProps {
   onMenuToggle?: () => void;
   sidebarState?: SidebarState;
+  sidebarPinned?: boolean;
+  isMobile?: boolean;
 }
 
-export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState }) => {
+export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState, sidebarPinned = false, isMobile = false }) => {
   const {
     user,
     userName,
@@ -41,6 +43,32 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState }) =>
     return badges[role as keyof typeof badges] || badges.nenhum;
   };
   const badge = userRole ? getRoleBadge(userRole) : null;
+
+  // Determinar título e ícone do botão toggle
+  const getToggleInfo = () => {
+    if (isMobile) {
+      return {
+        icon: sidebarState === 'open' ? ChevronLeft : Menu,
+        title: sidebarState === 'open' ? 'Fechar menu' : 'Abrir menu'
+      };
+    }
+    
+    if (sidebarPinned) {
+      return {
+        icon: Lock,
+        title: 'Menu fixado - Clique no ícone de pin na barra lateral para desfixar',
+        className: 'text-primary'
+      };
+    }
+    
+    return {
+      icon: sidebarState === 'open' ? ChevronLeft : Menu,
+      title: sidebarState === 'open' ? 'Minimizar menu' : 'Expandir menu'
+    };
+  };
+
+  const toggleInfo = getToggleInfo();
+  const ToggleIcon = toggleInfo.icon;
   
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 md:px-6">
@@ -50,13 +78,9 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuToggle, sidebarState }) =>
         size="icon"
         onClick={onMenuToggle}
         className="flex-shrink-0"
-        title={sidebarState === 'open' ? 'Minimizar menu' : 'Expandir menu'}
+        title={toggleInfo.title}
       >
-        {sidebarState === 'open' ? (
-          <ChevronLeft className="h-5 w-5" />
-        ) : (
-          <Menu className="h-5 w-5" />
-        )}
+        <ToggleIcon className={`h-5 w-5 ${toggleInfo.className || ''}`} />
       </Button>
       
       {/* Logo e título */}
