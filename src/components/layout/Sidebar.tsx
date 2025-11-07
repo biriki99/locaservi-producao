@@ -84,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
     >
       {/* Header - apenas visível quando está aberta */}
       {state === 'open' && (
-        <div className="flex h-16 items-center border-b px-4 flex-shrink-0 justify-between bg-sidebar">
+        <div className="flex h-16 items-center border-b px-4 flex-shrink-0 bg-sidebar">
           <div className="flex flex-col gap-0.5">
             <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
             {isDesktopView && (
@@ -93,86 +93,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
               </span>
             )}
           </div>
-          
-          {/* Botão de pin - apenas em desktop (>= 1024px) */}
-          {isDesktopView && onPinToggle && (
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onPinToggle}
-                    className={cn(
-                      "h-10 w-10 flex-shrink-0 transition-all hover:bg-sidebar-accent hover:scale-110 group",
-                      isPinned 
-                        ? "bg-primary/10 border border-primary/20" 
-                        : "bg-muted/50 border border-border"
-                    )}
-                  >
-                    <img 
-                      src={pinIcon} 
-                      alt={isPinned ? "Pin fixado" : "Pin não fixado"}
-                      className={cn(
-                        "h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12",
-                        isPinned 
-                          ? "opacity-100 rotate-0 brightness-110" 
-                          : "opacity-60 rotate-45"
-                      )}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p className="text-sm">
-                    {isPinned ? "Desfixar menu (permite minimizar)" : "Fixar menu (sempre visível)"}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
       )}
       
       {/* Espaçador + botão de pin quando está mini */}
-      {state === 'mini' && (
-        <div className="h-16 flex-shrink-0 flex items-center justify-center border-b bg-sidebar">
-          {isDesktopView && onPinToggle && (
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onPinToggle}
-                    className={cn(
-                      "h-10 w-10 transition-all hover:bg-sidebar-accent hover:scale-110 group",
-                      isPinned 
-                        ? "bg-primary/10 border border-primary/20" 
-                        : "bg-muted/50 border border-border"
-                    )}
-                  >
-                    <img 
-                      src={pinIcon} 
-                      alt={isPinned ? "Pin fixado" : "Pin não fixado"}
-                      className={cn(
-                        "h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12",
-                        isPinned 
-                          ? "opacity-100 rotate-0 brightness-110" 
-                          : "opacity-60 rotate-45"
-                      )}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p className="text-sm">
-                    {isPinned ? "Desfixar menu (permite minimizar)" : "Fixar menu (sempre visível)"}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
-      )}
+        {state === 'mini' && (
+          <div className="h-16 flex-shrink-0 border-b bg-sidebar" />
+        )}
       
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-2 overflow-y-auto no-scrollbar">
