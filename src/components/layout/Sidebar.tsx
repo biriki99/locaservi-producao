@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -45,6 +46,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
   const { userRole } = useAuth();
   const { servicos } = useData();
 
+  // Detecção de largura para garantir botão de pin em desktop
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isDesktopView = windowWidth >= 1024;
+
   // Calcular serviços atrasados
   const servicosAtrasados = servicos.filter(s => {
     if (s.status !== 'pendente') return false;
@@ -74,10 +86,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
       {/* Header - apenas visível quando está aberta */}
       {state === 'open' && (
         <div className="flex h-16 items-center border-b px-4 flex-shrink-0 justify-between bg-sidebar">
-          <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-lg font-semibold text-sidebar-foreground truncate">Navegação</span>
+            {isDesktopView && (
+              <span className="text-[10px] text-muted-foreground">
+                {isPinned ? "Menu fixado" : "Menu flutuante"}
+              </span>
+            )}
+          </div>
           
-          {/* Botão de pin - apenas em desktop */}
-          {!isMobile && onPinToggle && (
+          {/* Botão de pin - apenas em desktop (>= 1024px) */}
+          {isDesktopView && onPinToggle && (
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -86,14 +105,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
                     size="icon"
                     onClick={onPinToggle}
                     className={cn(
-                      "h-9 w-9 flex-shrink-0 transition-all hover:bg-sidebar-accent",
-                      isPinned && "bg-primary/10"
+                      "h-10 w-10 flex-shrink-0 transition-all hover:bg-sidebar-accent hover:scale-110",
+                      isPinned 
+                        ? "bg-primary/10 border border-primary/20" 
+                        : "bg-muted/50 border border-border"
                     )}
                   >
                     {isPinned ? (
-                      <Pin className="h-4 w-4 fill-current text-primary" />
+                      <Pin className="h-5 w-5 fill-current text-primary" />
                     ) : (
-                      <PinOff className="h-4 w-4 text-muted-foreground" />
+                      <PinOff className="h-5 w-5 text-muted-foreground" />
                     )}
                   </Button>
                 </TooltipTrigger>
@@ -111,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
       {/* Espaçador + botão de pin quando está mini */}
       {state === 'mini' && (
         <div className="h-16 flex-shrink-0 flex items-center justify-center border-b bg-sidebar">
-          {!isMobile && onPinToggle && (
+          {isDesktopView && onPinToggle && (
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -120,14 +141,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
                     size="icon"
                     onClick={onPinToggle}
                     className={cn(
-                      "h-9 w-9 transition-all hover:bg-sidebar-accent",
-                      isPinned && "bg-primary/10"
+                      "h-10 w-10 transition-all hover:bg-sidebar-accent hover:scale-110",
+                      isPinned 
+                        ? "bg-primary/10 border border-primary/20" 
+                        : "bg-muted/50 border border-border"
                     )}
                   >
                     {isPinned ? (
-                      <Pin className="h-4 w-4 fill-current text-primary" />
+                      <Pin className="h-5 w-5 fill-current text-primary" />
                     ) : (
-                      <PinOff className="h-4 w-4 text-muted-foreground" />
+                      <PinOff className="h-5 w-5 text-muted-foreground" />
                     )}
                   </Button>
                 </TooltipTrigger>
@@ -187,14 +210,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ state, onClose, isMobile, isPi
       
       {/* Footer - apenas quando aberta */}
       {state === 'open' && (
-        <div className="border-t p-4 flex-shrink-0 bg-sidebar">
+        <div className="border-t p-4 flex-shrink-0 bg-sidebar space-y-3">
+          {/* Botão alternativo no footer (desktop) */}
+          {isDesktopView && onPinToggle && (
+            <Button
+              onClick={onPinToggle}
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              {isPinned ? (
+                <>
+                  <Pin className="h-4 w-4 mr-2 fill-current" />
+                  Desfixar Menu
+                </>
+              ) : (
+                <>
+                  <PinOff className="h-4 w-4 mr-2" />
+                  Fixar Menu
+                </>
+              )}
+            </Button>
+          )}
+          
           <div className="rounded-lg bg-primary/10 p-3 transition-all hover:bg-primary/15">
             <p className="text-xs text-primary font-medium">
               CRM conectado ao Supabase
             </p>
-            {!isMobile && (
+            {isDesktopView && (
               <p className="text-xs text-muted-foreground mt-1">
-                {isPinned ? "Menu fixado" : "Clique no pin para fixar"}
+                {isPinned ? "Menu fixado" : "Menu flutuante"}
               </p>
             )}
           </div>
