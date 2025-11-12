@@ -1,4 +1,4 @@
-import { Cliente } from "@/types";
+import { Cliente, Categoria } from "@/types";
 import {
   Select,
   SelectContent,
@@ -16,18 +16,21 @@ interface FiltrosServicosProps {
     data_inicio?: string;
     data_fim?: string;
     cliente_id?: string;
+    maquina_id?: string;
     status_cobranca?: string;
   };
   onFiltrosChange: (filtros: any) => void;
   clientes: Cliente[];
+  categorias: Categoria[];
 }
 
-export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes }: FiltrosServicosProps) => {
+export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias }: FiltrosServicosProps) => {
   const limparFiltros = () => {
     onFiltrosChange({
       data_inicio: "",
       data_fim: "",
       cliente_id: "all",
+      maquina_id: "all",
       status_cobranca: "all"
     });
   };
@@ -50,6 +53,28 @@ export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes }: FiltrosS
               .map((cliente) => (
                 <SelectItem key={cliente.id} value={cliente.id}>
                   {cliente.nome}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm">Categoria/Máquina</Label>
+        <Select
+          value={filtros.maquina_id || "all"}
+          onValueChange={(value) => onFiltrosChange({ ...filtros, maquina_id: value })}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as categorias</SelectItem>
+            {[...categorias]
+              .sort((a, b) => a.nome_maquina.localeCompare(b.nome_maquina))
+              .map((categoria) => (
+                <SelectItem key={categoria.id} value={categoria.id}>
+                  {categoria.nome_maquina}
                 </SelectItem>
               ))}
           </SelectContent>

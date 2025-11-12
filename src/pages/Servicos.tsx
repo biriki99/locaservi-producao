@@ -42,6 +42,7 @@ export default function Servicos() {
     data_inicio: "",
     data_fim: "",
     cliente_id: "all",
+    maquina_id: "all",
     status_cobranca: "all"
   });
 
@@ -169,6 +170,7 @@ export default function Servicos() {
   // Aplicar filtros locais
   const servicosFiltrados = servicos.filter(s => {
     const clienteMatch = filtrosLocais.cliente_id === "all" || s.cliente_id === filtrosLocais.cliente_id;
+    const maquinaMatch = filtrosLocais.maquina_id === "all" || s.maquina_id === filtrosLocais.maquina_id;
     const statusMatch = filtrosLocais.status_cobranca === "all" || s.status_cobranca === filtrosLocais.status_cobranca;
     
     let dataMatch = true;
@@ -179,7 +181,7 @@ export default function Servicos() {
       dataMatch = dataMatch && new Date(s.data_fim) <= new Date(filtrosLocais.data_fim);
     }
     
-    return clienteMatch && statusMatch && dataMatch;
+    return clienteMatch && maquinaMatch && statusMatch && dataMatch;
   });
 
   const columns = [
@@ -243,6 +245,7 @@ export default function Servicos() {
         filtros={filtrosLocais}
         onFiltrosChange={setFiltrosLocais}
         clientes={clientes}
+        categorias={categorias}
       />
 
       {viewMode === 'cards' ? (
