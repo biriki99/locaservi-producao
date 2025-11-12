@@ -44,6 +44,13 @@ export const AppLayout = () => {
     prevIsMobileRef.current = isMobile;
   }, [isMobile, sidebarPinned]);
 
+  // Garantir que sidebar pinada sempre fica aberta no desktop
+  useEffect(() => {
+    if (!isMobile && sidebarPinned && sidebarState !== 'open') {
+      setSidebarState('open');
+    }
+  }, [isMobile, sidebarPinned, sidebarState]);
+
   // IMPORTANTE: Calcular padding ANTES de qualquer retorno condicional
   const mainPadding = useMemo(() => {
     if (isMobile) return '';
