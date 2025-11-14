@@ -74,42 +74,6 @@ export type Database = {
         }
         Relationships: []
       }
-      leads: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: string
-          interesse: string | null
-          nome: string
-          observacoes: string | null
-          status: string
-          telefone: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          interesse?: string | null
-          nome: string
-          observacoes?: string | null
-          status?: string
-          telefone: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          interesse?: string | null
-          nome?: string
-          observacoes?: string | null
-          status?: string
-          telefone?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
