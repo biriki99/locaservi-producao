@@ -25,7 +25,7 @@ const navigation = [
   { name: "Categorias", href: "/categorias", icon: Package, roles: ["admin"] },
   { name: "Serviços", href: "/servicos", icon: Wrench, roles: ["admin", "user_comum"] },
   { name: "Alertas", href: "/alertas", icon: AlertCircle, roles: ["admin", "user_comum"], hasBadge: true },
-  { name: "Leads", href: "/leads", icon: MessageSquare, roles: ["admin", "user_comum"] },
+  { name: "Agendamentos", href: "/agendamentos", icon: MessageSquare, roles: ["admin", "user_comum"] },
   { name: "Relatórios", href: "/relatorios", icon: FileBarChart, roles: ["admin", "user_comum"] },
   { name: "Usuários", href: "/usuarios", icon: UserCog, roles: ["admin"] },
   { name: "Configurações", href: "/configuracoes", icon: Settings, roles: ["admin", "user_comum"] }

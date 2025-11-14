@@ -21,7 +21,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Clientes = lazy(() => import("./pages/Clientes"));
 const Categorias = lazy(() => import("./pages/Categorias"));
 const Servicos = lazy(() => import("./pages/Servicos"));
-const Leads = lazy(() => import("./pages/Leads"));
+const Agendamentos = lazy(() => import("./pages/Agendamentos"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 const Relatorios = lazy(() => import("./pages/Relatorios"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
@@ -80,9 +80,9 @@ const AppContent = () => {
               <AlertasServicos />
             </Suspense>
           } />
-          <Route path="/leads" element={
+          <Route path="/agendamentos" element={
             <Suspense fallback={<PageLoader />}>
-              <Leads />
+              <Agendamentos />
             </Suspense>
           } />
           <Route path="/relatorios" element={

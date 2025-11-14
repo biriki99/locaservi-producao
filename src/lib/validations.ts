@@ -103,37 +103,18 @@ export const servicoSchema = z.object({
   path: ["data_fim"],
 });
 
-// Lead validation schema
-export const leadSchema = z.object({
-  nome: z
-    .string()
-    .trim()
-    .min(1, "Nome é obrigatório")
-    .max(100, "Nome deve ter no máximo 100 caracteres"),
-  telefone: z
-    .string()
-    .trim()
-    .min(1, "Telefone é obrigatório")
-    .max(20, "Telefone deve ter no máximo 20 caracteres"),
-  email: z
-    .string()
-    .trim()
-    .email("Email inválido")
-    .max(255, "Email deve ter no máximo 255 caracteres")
-    .optional()
-    .or(z.literal("")),
-  interesse: z
-    .string()
-    .trim()
-    .min(1, "Interesse é obrigatório")
-    .max(200, "Interesse deve ter no máximo 200 caracteres"),
-  status: z.enum(["novo", "contato_feito", "negociacao", "convertido", "perdido"]).optional(),
-  observacoes: z
-    .string()
-    .trim()
-    .max(1000, "Observações devem ter no máximo 1000 caracteres")
-    .optional()
-    .or(z.literal("")),
+// Agendamento validation schema
+export const agendamentoSchema = z.object({
+  cliente_id: z.string().uuid({ message: "Cliente inválido" }),
+  titulo: z.string()
+    .min(3, { message: "Título deve ter no mínimo 3 caracteres" })
+    .max(100, { message: "Título deve ter no máximo 100 caracteres" }),
+  descricao: z.string().optional(),
+  status: z.enum(["reservado_maquina", "agendado_pagamento", "confirmado", "em_andamento", "cancelado"], {
+    message: "Status inválido"
+  }),
+  data_agendamento: z.string().min(1, { message: "Data do agendamento é obrigatória" }),
+  observacoes: z.string().optional()
 });
 
 // Login validation schema
