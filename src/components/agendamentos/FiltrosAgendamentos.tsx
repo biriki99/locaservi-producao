@@ -4,19 +4,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
-interface FiltrosLeadsProps {
+interface FiltrosAgendamentosProps {
   filtros: {
     busca: string;
     status: string;
+    data_inicio: string;
+    data_fim: string;
   };
   onFiltrosChange: (filtros: any) => void;
 }
 
-export const FiltrosLeads = ({ filtros, onFiltrosChange }: FiltrosLeadsProps) => {
+export const FiltrosAgendamentos = ({ filtros, onFiltrosChange }: FiltrosAgendamentosProps) => {
   const limparFiltros = () => {
     onFiltrosChange({
       busca: "",
-      status: "all"
+      status: "all",
+      data_inicio: "",
+      data_fim: ""
     });
   };
 
@@ -30,12 +34,12 @@ export const FiltrosLeads = ({ filtros, onFiltrosChange }: FiltrosLeadsProps) =>
         </Button>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Label htmlFor="busca">Buscar por Nome</Label>
+          <Label htmlFor="busca">Buscar por Título</Label>
           <Input
             id="busca"
-            placeholder="Digite o nome..."
+            placeholder="Digite o título..."
             value={filtros.busca}
             onChange={(e) => onFiltrosChange({ ...filtros, busca: e.target.value })}
           />
@@ -52,13 +56,33 @@ export const FiltrosLeads = ({ filtros, onFiltrosChange }: FiltrosLeadsProps) =>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="novo">Novo</SelectItem>
-              <SelectItem value="contato_feito">Contato Feito</SelectItem>
-              <SelectItem value="negociacao">Negociação</SelectItem>
-              <SelectItem value="convertido">Convertido</SelectItem>
-              <SelectItem value="perdido">Perdido</SelectItem>
+              <SelectItem value="reservado_maquina">Reservado Máquina</SelectItem>
+              <SelectItem value="agendado_pagamento">Agendado Pagamento</SelectItem>
+              <SelectItem value="confirmado">Confirmado</SelectItem>
+              <SelectItem value="em_andamento">Em Andamento</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="data_inicio">Data Início</Label>
+          <Input
+            id="data_inicio"
+            type="date"
+            value={filtros.data_inicio}
+            onChange={(e) => onFiltrosChange({ ...filtros, data_inicio: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="data_fim">Data Fim</Label>
+          <Input
+            id="data_fim"
+            type="date"
+            value={filtros.data_fim}
+            onChange={(e) => onFiltrosChange({ ...filtros, data_fim: e.target.value })}
+          />
         </div>
       </div>
     </div>
