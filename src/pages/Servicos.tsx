@@ -65,11 +65,18 @@ export default function Servicos() {
   // Abrir serviço automaticamente se vier da URL
   useEffect(() => {
     const viewId = searchParams.get('view');
+    const editId = searchParams.get('edit');
+    
     if (viewId) {
       const servico = servicos.find(s => s.id === viewId);
       if (servico) {
         handleView(servico);
-        // Limpar o parâmetro da URL após abrir
+        setSearchParams({});
+      }
+    } else if (editId) {
+      const servico = servicos.find(s => s.id === editId);
+      if (servico) {
+        handleEdit(servico);
         setSearchParams({});
       }
     }
