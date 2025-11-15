@@ -18,6 +18,7 @@ interface FiltrosServicosProps {
     cliente_id?: string;
     maquina_id?: string;
     status_cobranca?: string;
+    status?: string;
   };
   onFiltrosChange: (filtros: any) => void;
   clientes: Cliente[];
@@ -31,7 +32,8 @@ export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias
       data_fim: "",
       cliente_id: "all",
       maquina_id: "all",
-      status_cobranca: "all"
+      status_cobranca: "all",
+      status: "all"
     });
   };
 
@@ -94,6 +96,24 @@ export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="pago">Pago</SelectItem>
             <SelectItem value="a_receber">A Receber</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm">Status do Serviço</Label>
+        <Select
+          value={filtros.status || "all"}
+          onValueChange={(value) => onFiltrosChange({ ...filtros, status: value })}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="pendente">Pendente</SelectItem>
+            <SelectItem value="concluido">Concluído</SelectItem>
+            <SelectItem value="cancelado">Cancelado</SelectItem>
           </SelectContent>
         </Select>
       </div>
