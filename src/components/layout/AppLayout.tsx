@@ -60,7 +60,7 @@ export const AppLayout = () => {
   }, [isMobile, sidebarState]);
 
   // Rotas permitidas para usuário comum
-  const commonUserRoutes = ["/dashboard", "/clientes", "/leads", "/servicos", "/alertas", "/relatorios", "/configuracoes"];
+  const commonUserRoutes = ["/dashboard", "/clientes", "/agendamentos", "/servicos", "/alertas", "/relatorios", "/configuracoes"];
   
   if (loading) {
     return (

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Cliente, Categoria, Servico, Lead, Usuario, Filtros, UserRole } from "@/types";
+import { Cliente, Categoria, Servico, Agendamento, Usuario, Filtros, UserRole } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
@@ -8,7 +8,7 @@ interface DataContextType {
   clientes: Cliente[];
   categorias: Categoria[];
   servicos: Servico[];
-  leads: Lead[];
+  agendamentos: Agendamento[];
   usuarios: Usuario[];
   filtros: Filtros;
   loading: boolean;
@@ -22,9 +22,9 @@ interface DataContextType {
   addServico: (servico: Omit<Servico, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
   updateServico: (id: string, servico: Partial<Servico>) => Promise<void>;
   deleteServico: (id: string) => Promise<void>;
-  addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
-  updateLead: (id: string, lead: Partial<Lead>) => Promise<void>;
-  deleteLead: (id: string) => Promise<void>;
+  addAgendamento: (agendamento: Omit<Agendamento, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
+  updateAgendamento: (id: string, agendamento: Partial<Agendamento>) => Promise<void>;
+  deleteAgendamento: (id: string) => Promise<void>;
   updateUsuario: (id: string, role: string) => Promise<void>;
   deleteUsuario: (id: string) => Promise<void>;
   inactivateUsuario: (id: string, status: 'ativo' | 'inativo') => Promise<void>;
@@ -38,7 +38,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
-  const [leads, setLeads] = useState<Lead[]>([]);
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtros, setFiltros] = useState<Filtros>({
@@ -67,7 +67,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetchClientes(),
         fetchCategorias(),
         fetchServicos(),
-        fetchLeads(),
+        fetchAgendamentos(),
         fetchUsuarios()
       ]);
     } catch (error) {
@@ -120,18 +120,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setServicos((data || []) as Servico[]);
   };
 
-  const fetchLeads = async () => {
+  const fetchAgendamentos = async () => {
     const { data, error } = await supabase
-      .from('leads')
+      .from('agendamentos')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('data_agendamento', { ascending: true });
 
     if (error) {
-      console.error('Erro ao buscar leads:', error);
+      console.error('Erro ao buscar agendamentos:', error);
       return;
     }
 
-    setLeads((data || []) as Lead[]);
+    setAgendamentos((data || []) as Agendamento[]);
   };
 
   const fetchUsuarios = async () => {
@@ -306,49 +306,52 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fetchServicos();
   };
 
-  // LEADS
-  const addLead = async (lead: Omit<Lead, 'id' | 'created_at' | 'user_id'>) => {
+  // AGENDAMENTOS
+  const addAgendamento = async (agendamento: Omit<Agendamento, 'id' | 'created_at' | 'user_id'>) => {
     const { error } = await supabase
-      .from('leads')
-      .insert([{ ...lead, user_id: user!.id }]);
+      .from('agendamentos')
+      .insert([{ ...agendamento, user_id: user!.id }]);
 
     if (error) {
-      toast.error('Erro ao criar lead');
-      throw error;
+      toast.error('Erro ao criar agendamento');
+      console.error('Erro:', error);
+      return;
     }
 
-    toast.success('Lead criado com sucesso');
-    await fetchLeads();
+    toast.success('Agendamento criado com sucesso');
+    await fetchAgendamentos();
   };
 
-  const updateLead = async (id: string, updatedData: Partial<Lead>) => {
+  const updateAgendamento = async (id: string, updatedData: Partial<Agendamento>) => {
     const { error } = await supabase
-      .from('leads')
+      .from('agendamentos')
       .update(updatedData)
       .eq('id', id);
 
     if (error) {
-      toast.error('Erro ao atualizar lead');
-      throw error;
+      toast.error('Erro ao atualizar agendamento');
+      console.error('Erro:', error);
+      return;
     }
 
-    toast.success('Lead atualizado com sucesso');
-    await fetchLeads();
+    toast.success('Agendamento atualizado com sucesso');
+    await fetchAgendamentos();
   };
 
-  const deleteLead = async (id: string) => {
+  const deleteAgendamento = async (id: string) => {
     const { error } = await supabase
-      .from('leads')
+      .from('agendamentos')
       .delete()
       .eq('id', id);
 
     if (error) {
-      toast.error('Erro ao deletar lead');
-      throw error;
+      toast.error('Erro ao deletar agendamento');
+      console.error('Erro:', error);
+      return;
     }
 
-    toast.success('Lead deletado com sucesso');
-    await fetchLeads();
+    toast.success('Agendamento deletado com sucesso');
+    await fetchAgendamentos();
   };
 
   // USUARIOS
@@ -421,7 +424,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clientes,
         categorias,
         servicos,
-        leads,
+        agendamentos,
         usuarios,
         filtros,
         loading,
@@ -435,9 +438,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addServico,
         updateServico,
         deleteServico,
-        addLead,
-        updateLead,
-        deleteLead,
+        addAgendamento,
+        updateAgendamento,
+        deleteAgendamento,
         updateUsuario,
         deleteUsuario,
         inactivateUsuario,

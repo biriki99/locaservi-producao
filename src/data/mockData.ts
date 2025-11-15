@@ -1,4 +1,4 @@
-import { Cliente, Categoria, Servico, Lead, Usuario } from "@/types";
+import { Cliente, Categoria, Servico, Agendamento, Usuario } from "@/types";
 
 export const mockClientes: Cliente[] = [
   {
@@ -335,96 +335,6 @@ export const mockServicos: Servico[] = [
   }
 ];
 
-export const mockLeads: Lead[] = [
-  {
-    id: "lead-1",
-    nome: "Paulo Construções",
-    telefone: "+55 11 98765-4321",
-    email: "paulo@construcoes.com",
-    interesse: "Betoneira 200L - Uso mensal",
-    status: "novo",
-    observacoes: "Solicitou orçamento via WhatsApp",
-    created_at: "2024-10-15T10:00:00Z",
-    user_id: "user-123"
-  },
-  {
-    id: "lead-2",
-    nome: "Ana Paula Reformas",
-    telefone: "+55 11 97654-3210",
-    email: "ana.paula@reformas.com.br",
-    interesse: "Kit ferramentas elétricas",
-    status: "contato_feito",
-    observacoes: "Enviado catálogo por email - Aguardando retorno",
-    created_at: "2024-10-12T14:30:00Z",
-    user_id: "user-123"
-  },
-  {
-    id: "lead-3",
-    nome: "Construtora Alvorada",
-    telefone: "+55 11 96543-2109",
-    email: "comercial@alvorada.com.br",
-    interesse: "Andaimes e geradores",
-    status: "negociacao",
-    observacoes: "Em negociação - Proposta de contrato trimestral",
-    created_at: "2024-10-08T09:15:00Z",
-    user_id: "user-123"
-  },
-  {
-    id: "lead-4",
-    nome: "José Carlos - Autônomo",
-    telefone: "+55 11 95432-1098",
-    email: "josecarlos@email.com",
-    interesse: "Compressor de ar",
-    status: "convertido",
-    observacoes: "Convertido em cliente - Primeiro aluguel concluído",
-    created_at: "2024-09-28T11:20:00Z",
-    user_id: "user-123"
-  },
-  {
-    id: "lead-5",
-    nome: "Engenharia Total",
-    telefone: "+55 11 94321-0987",
-    email: "contato@engenhariatotal.com.br",
-    interesse: "Parceria - Múltiplos equipamentos",
-    status: "negociacao",
-    observacoes: "Grande empresa - Reunião agendada para próxima semana",
-    created_at: "2024-10-10T08:45:00Z",
-    user_id: "user-123"
-  },
-  {
-    id: "lead-6",
-    nome: "Mariana Silva",
-    telefone: "+55 11 93210-9876",
-    email: "mariana.silva@email.com",
-    interesse: "Escada extensível",
-    status: "perdido",
-    observacoes: "Optou por comprar ao invés de alugar",
-    created_at: "2024-10-05T13:10:00Z",
-    user_id: "user-123"
-  },
-  {
-    id: "lead-7",
-    nome: "Reformas Express",
-    telefone: "+55 11 92109-8765",
-    email: "express@reformas.com",
-    interesse: "Serra circular e furadeira",
-    status: "contato_feito",
-    observacoes: "Ligação realizada - Enviado WhatsApp com valores",
-    created_at: "2024-10-14T16:30:00Z",
-    user_id: "user-123"
-  },
-  {
-    id: "lead-8",
-    nome: "Construtora Horizonte Novo",
-    telefone: "+55 11 91098-7654",
-    email: "horizonte@novoconstrucoes.com.br",
-    interesse: "Gerador diesel 5KVA",
-    status: "novo",
-    observacoes: "Lead vindo de indicação de cliente",
-    created_at: "2024-10-16T10:00:00Z",
-    user_id: "user-123"
-  }
-];
 
 export const mockUsuarios: Usuario[] = [
   {

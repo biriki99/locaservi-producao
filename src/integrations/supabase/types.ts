@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      agendamentos: {
+        Row: {
+          cliente_id: string
+          created_at: string | null
+          data_agendamento: string
+          descricao: string | null
+          id: string
+          observacoes: string | null
+          status: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string | null
+          data_agendamento: string
+          descricao?: string | null
+          id?: string
+          observacoes?: string | null
+          status?: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string | null
+          data_agendamento?: string
+          descricao?: string | null
+          id?: string
+          observacoes?: string | null
+          status?: string
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categorias: {
         Row: {
           created_at: string
@@ -69,42 +113,6 @@ export type Database = {
           id?: string
           nome?: string
           observacoes?: string | null
-          telefone?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      leads: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: string
-          interesse: string | null
-          nome: string
-          observacoes: string | null
-          status: string
-          telefone: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          interesse?: string | null
-          nome: string
-          observacoes?: string | null
-          status?: string
-          telefone: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          interesse?: string | null
-          nome?: string
-          observacoes?: string | null
-          status?: string
           telefone?: string
           user_id?: string
         }

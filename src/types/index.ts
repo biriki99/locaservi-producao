@@ -44,16 +44,16 @@ export interface Servico {
   created_at: string;
 }
 
-export interface Lead {
+export interface Agendamento {
   id: string;
-  nome: string;
-  telefone: string;
-  email: string;
-  interesse: string;
-  status: "novo" | "contato_feito" | "negociacao" | "convertido" | "perdido";
+  user_id: string;
+  cliente_id: string;
+  titulo: string;
+  descricao: string;
+  status: "reservado_maquina" | "agendado_pagamento" | "confirmado" | "em_andamento" | "cancelado";
+  data_agendamento: string;
   observacoes: string;
   created_at: string;
-  user_id: string;
 }
 
 export interface Usuario {
