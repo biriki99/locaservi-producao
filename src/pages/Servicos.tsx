@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import { DataTable } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ import { servicoSchema } from "@/lib/validations";
 export default function Servicos() {
   const { servicos, clientes, categorias, addServico, updateServico, deleteServico } = useData();
   const { user, isAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingServico, setEditingServico] = useState<Servico | null>(null);
@@ -43,7 +45,8 @@ export default function Servicos() {
     data_fim: "",
     cliente_id: "all",
     maquina_id: "all",
-    status_cobranca: "all"
+    status_cobranca: "all",
+    status: "all"
   });
 
   const canEdit = isAdmin;
@@ -58,6 +61,19 @@ export default function Servicos() {
       }
     }
   }, [formData.maquina_id, categorias, editingServico]);
+
+  // Abrir serviço automaticamente se vier da URL
+  useEffect(() => {
+    const viewId = searchParams.get('view');
+    if (viewId) {
+      const servico = servicos.find(s => s.id === viewId);
+      if (servico) {
+        handleView(servico);
+        // Limpar o parâmetro da URL após abrir
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, servicos]);
 
   const handleCreate = () => {
     if (!canEdit) return;
@@ -171,7 +187,8 @@ export default function Servicos() {
   const servicosFiltrados = servicos.filter(s => {
     const clienteMatch = filtrosLocais.cliente_id === "all" || s.cliente_id === filtrosLocais.cliente_id;
     const maquinaMatch = filtrosLocais.maquina_id === "all" || s.maquina_id === filtrosLocais.maquina_id;
-    const statusMatch = filtrosLocais.status_cobranca === "all" || s.status_cobranca === filtrosLocais.status_cobranca;
+    const statusCobrancaMatch = filtrosLocais.status_cobranca === "all" || s.status_cobranca === filtrosLocais.status_cobranca;
+    const statusMatch = filtrosLocais.status === "all" || s.status === filtrosLocais.status;
     
     let dataMatch = true;
     if (filtrosLocais.data_inicio) {
@@ -181,7 +198,7 @@ export default function Servicos() {
       dataMatch = dataMatch && new Date(s.data_fim) <= new Date(filtrosLocais.data_fim);
     }
     
-    return clienteMatch && maquinaMatch && statusMatch && dataMatch;
+    return clienteMatch && maquinaMatch && statusCobrancaMatch && statusMatch && dataMatch;
   });
 
   const columns = [
