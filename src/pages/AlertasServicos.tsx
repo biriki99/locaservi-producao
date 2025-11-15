@@ -120,7 +120,7 @@ export default function AlertasServicos() {
     setIsViewDialogOpen(false);
     
     // Navegar para a página de serviços com o ID do serviço na URL
-    navigate(`/servicos?view=${servicoId}`);
+    navigate(`/servicos?edit=${servicoId}`);
   };
 
   const getStatusBadge = (status: string) => {
