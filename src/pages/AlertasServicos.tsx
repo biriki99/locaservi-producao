@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useData } from "@/contexts/DataContext";
 import { AlertaServicoCard } from "@/components/alertas/AlertaServicoCard";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Search } from "lucide-react";
+import { AlertCircle, Search, Eye, ExternalLink } from "lucide-react";
 import { format, parseISO, differenceInDays, startOfDay } from "date-fns";
-import { Servico } from "@/types";
+import { Servico, Cliente } from "@/types";
 
 export default function AlertasServicos() {
   const { servicos, clientes, categorias } = useData();
+  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [clienteFiltro, setClienteFiltro] = useState("all");
   const [categoriaFiltro, setCategoriaFiltro] = useState("all");
@@ -20,6 +22,8 @@ export default function AlertasServicos() {
   const [ordenacao, setOrdenacao] = useState("prazo");
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [viewingServico, setViewingServico] = useState<Servico | null>(null);
+  const [isClienteDialogOpen, setIsClienteDialogOpen] = useState(false);
+  const [viewingCliente, setViewingCliente] = useState<Cliente | null>(null);
 
   // Função para calcular dias restantes
   const calcularDiasRestantes = (dataFim: string): number => {
@@ -101,6 +105,22 @@ export default function AlertasServicos() {
   const handleView = (servico: Servico) => {
     setViewingServico(servico);
     setIsViewDialogOpen(true);
+  };
+
+  const handleViewCliente = (clienteId: string) => {
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (cliente) {
+      setViewingCliente(cliente);
+      setIsClienteDialogOpen(true);
+    }
+  };
+
+  const handleGoToServico = (servicoId: string) => {
+    // Fechar o diálogo atual
+    setIsViewDialogOpen(false);
+    
+    // Navegar para a página de serviços com o ID do serviço na URL
+    navigate(`/servicos?edit=${servicoId}`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -326,7 +346,17 @@ export default function AlertasServicos() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label className="text-sm font-semibold text-muted-foreground">Cliente</Label>
-                  <p className="text-base">{clientes.find(c => c.id === viewingServico.cliente_id)?.nome || "N/A"}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-base">{clientes.find(c => c.id === viewingServico.cliente_id)?.nome || "N/A"}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewCliente(viewingServico.cliente_id)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver Detalhes
+                    </Button>
+                  </div>
                 </div>
                 <div>
                   <Label className="text-sm font-semibold text-muted-foreground">Máquina</Label>
@@ -386,8 +416,75 @@ export default function AlertasServicos() {
                 </div>
               )}
 
-              <div className="flex justify-end">
+              <div className="flex justify-between items-center">
+                <Button 
+                  variant="outline"
+                  onClick={() => handleGoToServico(viewingServico.id)}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ir para o Serviço
+                </Button>
                 <Button onClick={() => setIsViewDialogOpen(false)}>
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualização do Cliente */}
+      <Dialog open={isClienteDialogOpen} onOpenChange={setIsClienteDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Dados do Cliente</DialogTitle>
+            <DialogDescription>
+              Informações completas do cliente
+            </DialogDescription>
+          </DialogHeader>
+          {viewingCliente && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-semibold text-muted-foreground">Nome</Label>
+                <p className="text-base font-medium">{viewingCliente.nome}</p>
+              </div>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Telefone</Label>
+                  <p className="text-base">{viewingCliente.telefone}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Email</Label>
+                  <p className="text-base">{viewingCliente.email}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">CPF/CNPJ</Label>
+                  <p className="text-base">{viewingCliente.cpf_cnpj}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Endereço</Label>
+                  <p className="text-base">{viewingCliente.endereco || "N/A"}</p>
+                </div>
+              </div>
+
+              {viewingCliente.observacoes && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Observações</Label>
+                  <p className="text-base whitespace-pre-wrap">{viewingCliente.observacoes}</p>
+                </div>
+              )}
+
+              <div>
+                <Label className="text-sm font-semibold text-muted-foreground">Cadastrado em</Label>
+                <p className="text-sm">{format(parseISO(viewingCliente.created_at), "dd/MM/yyyy 'às' HH:mm")}</p>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={() => setIsClienteDialogOpen(false)}>
                   Fechar
                 </Button>
               </div>
