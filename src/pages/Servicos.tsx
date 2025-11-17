@@ -4,6 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import { DataTable } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { SortableServicoCard } from "@/components/servicos/SortableServicoCard";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Grid, List } from "lucide-react";
+import { Plus, Grid, List, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Servico } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +51,8 @@ export default function Servicos() {
     status_cobranca: "all",
     status: "all"
   });
+  const [servicosOrdenados, setServicosOrdenados] = useState<Servico[]>([]);
+  const [ordemCustomizada, setOrdemCustomizada] = useState(false);
 
   const canEdit = isAdmin;
 
@@ -208,6 +213,45 @@ export default function Servicos() {
     return clienteMatch && maquinaMatch && statusCobrancaMatch && statusMatch && dataMatch;
   });
 
+  // Sincronizar servicosOrdenados com servicosFiltrados quando não está customizado
+  useEffect(() => {
+    if (!ordemCustomizada) {
+      setServicosOrdenados(servicosFiltrados);
+    }
+  }, [servicosFiltrados, ordemCustomizada]);
+
+  // Configurar sensores para drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setServicosOrdenados((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+      if (!ordemCustomizada) {
+        setOrdemCustomizada(true);
+        toast.success("Ordem personalizada aplicada");
+      }
+    }
+  };
+
+  const restaurarOrdemOriginal = () => {
+    setServicosOrdenados(servicosFiltrados);
+    setOrdemCustomizada(false);
+    toast.info("Ordem original restaurada");
+  };
+
   const columns = [
     { header: "Título", accessor: "titulo_servico" as keyof Servico, sortable: true },
     { 
@@ -234,12 +278,28 @@ export default function Servicos() {
 
   return (
     <div className="space-y-6 animate-in">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold">Serviços</h1>
           <p className="text-muted-foreground">Gerencie seus serviços e aluguéis</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {ordemCustomizada && (
+            <Badge variant="secondary" className="gap-1 py-2">
+              Ordem personalizada
+            </Badge>
+          )}
+          {ordemCustomizada && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={restaurarOrdemOriginal}
+              className="gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Restaurar ordem
+            </Button>
+          )}
           <Button
             variant={viewMode === 'cards' ? 'default' : 'outline'}
             size="icon"
@@ -273,38 +333,61 @@ export default function Servicos() {
       />
 
       {viewMode === 'cards' ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {servicosFiltrados.length > 0 ? (
-            servicosFiltrados.map((servico) => (
-              <ServicoCard
-                key={servico.id}
-                servico={servico}
-                cliente={clientes.find(c => c.id === servico.cliente_id)}
-                categoria={categorias.find(c => c.id === servico.maquina_id)}
-                onView={() => handleView(servico)}
-                onEdit={canEdit ? () => handleEdit(servico) : undefined}
-                onDelete={canEdit ? () => handleDelete(servico) : undefined}
-                canEdit={canEdit}
-                canDelete={canEdit}
-              />
-            ))
-          ) : (
-            <p className="col-span-full text-center text-muted-foreground py-8">
-              Nenhum serviço encontrado
-            </p>
-          )}
-        </div>
+        <DndContext 
+          sensors={sensors} 
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext 
+            items={servicosOrdenados.map(s => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {servicosOrdenados.length > 0 ? (
+                servicosOrdenados.map((servico) => (
+                  <SortableServicoCard
+                    key={servico.id}
+                    servico={servico}
+                    cliente={clientes.find(c => c.id === servico.cliente_id)}
+                    categoria={categorias.find(c => c.id === servico.maquina_id)}
+                    onView={() => handleView(servico)}
+                    onEdit={canEdit ? () => handleEdit(servico) : undefined}
+                    onDelete={canEdit ? () => handleDelete(servico) : undefined}
+                    canEdit={canEdit}
+                    canDelete={canEdit}
+                  />
+                ))
+              ) : (
+                <p className="col-span-full text-center text-muted-foreground py-8">
+                  Nenhum serviço encontrado
+                </p>
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
       ) : (
-        <DataTable
-          data={servicosFiltrados}
-          columns={columns}
-          onEdit={canEdit ? handleEdit : undefined}
-          onDelete={canEdit ? handleDelete : undefined}
-          searchPlaceholder="Buscar serviços..."
-          emptyMessage="Nenhum serviço cadastrado"
-          canEdit={canEdit}
-          canDelete={canEdit}
-        />
+        <DndContext 
+          sensors={sensors} 
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext 
+            items={servicosOrdenados.map(s => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <DataTable
+              data={servicosOrdenados}
+              columns={columns}
+              onEdit={canEdit ? handleEdit : undefined}
+              onDelete={canEdit ? handleDelete : undefined}
+              searchPlaceholder="Buscar serviços..."
+              emptyMessage="Nenhum serviço cadastrado"
+              canEdit={canEdit}
+              canDelete={canEdit}
+              isDraggable={true}
+            />
+          </SortableContext>
+        </DndContext>
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

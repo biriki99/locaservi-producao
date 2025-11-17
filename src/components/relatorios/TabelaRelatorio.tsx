@@ -1,4 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
+import { SortableTableRow } from "@/components/shared/SortableTableRow";
 
 interface Props {
   dados: any[];
@@ -7,9 +8,10 @@ interface Props {
   labelsColunas: Record<string, string>;
   mostrarTotal?: boolean;
   totalValor?: number;
+  isDraggable?: boolean;
 }
 
-export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTotal, totalValor }: Props) => {
+export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTotal, totalValor, isDraggable = false }: Props) => {
   if (dados.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 border rounded-lg bg-muted/10">
@@ -45,6 +47,7 @@ export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTo
         <Table>
           <TableHeader>
             <TableRow>
+              {isDraggable && <TableHead className="w-12"></TableHead>}
               {colunas.map(coluna => (
                 <TableHead key={coluna} className="font-semibold">
                   {labelsColunas[coluna] || coluna}
@@ -53,20 +56,34 @@ export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTo
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dados.map((row, idx) => (
-              <TableRow key={idx}>
-                {colunas.map(coluna => (
-                  <TableCell key={coluna}>
-                    {formatarValor(row[coluna], coluna)}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+            {dados.map((row, idx) => {
+              if (isDraggable && row.id) {
+                return (
+                  <SortableTableRow key={row.id} id={row.id}>
+                    {colunas.map(coluna => (
+                      <TableCell key={coluna}>
+                        {formatarValor(row[coluna], coluna)}
+                      </TableCell>
+                    ))}
+                  </SortableTableRow>
+                );
+              }
+              
+              return (
+                <TableRow key={idx}>
+                  {colunas.map(coluna => (
+                    <TableCell key={coluna}>
+                      {formatarValor(row[coluna], coluna)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
           </TableBody>
           {mostrarTotal && totalValor !== undefined && (
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={colunas.length - 1} className="text-right font-semibold">
+                <TableCell colSpan={(isDraggable ? colunas.length : colunas.length - 1)} className="text-right font-semibold">
                   TOTAL:
                 </TableCell>
                 <TableCell className="font-bold text-lg">
