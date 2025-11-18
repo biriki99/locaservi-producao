@@ -1,5 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { SortableTableRow } from "@/components/shared/SortableTableRow";
+import { ArrowUpDown } from "lucide-react";
+import { useState } from "react";
 
 interface Props {
   dados: any[];
@@ -9,9 +11,37 @@ interface Props {
   mostrarTotal?: boolean;
   totalValor?: number;
   isDraggable?: boolean;
+  onSort?: (coluna: string, direcao: 'asc' | 'desc') => void;
 }
 
-export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTotal, totalValor, isDraggable = false }: Props) => {
+export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTotal, totalValor, isDraggable = false, onSort }: Props) => {
+  const [colunaOrdenada, setColunaOrdenada] = useState<string | null>(null);
+  const [direcaoOrdenacao, setDirecaoOrdenacao] = useState<'asc' | 'desc'>('asc');
+
+  const handleSort = (coluna: string) => {
+    let novaDirecao: 'asc' | 'desc' = 'asc';
+    
+    if (colunaOrdenada === coluna) {
+      // Alterna entre asc, desc e null (volta ao padrão)
+      if (direcaoOrdenacao === 'asc') {
+        novaDirecao = 'desc';
+      } else {
+        // Resetar ordenação
+        setColunaOrdenada(null);
+        setDirecaoOrdenacao('asc');
+        if (onSort) onSort('', 'asc'); // Sinaliza reset
+        return;
+      }
+    }
+    
+    setColunaOrdenada(coluna);
+    setDirecaoOrdenacao(novaDirecao);
+    
+    if (onSort) {
+      onSort(coluna, novaDirecao);
+    }
+  };
+
   if (dados.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 border rounded-lg bg-muted/10">
@@ -50,7 +80,18 @@ export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTo
               {isDraggable && <TableHead className="w-12"></TableHead>}
               {colunas.map(coluna => (
                 <TableHead key={coluna} className="font-semibold">
-                  {labelsColunas[coluna] || coluna}
+                  <button
+                    onClick={() => handleSort(coluna)}
+                    className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer w-full text-left"
+                  >
+                    {labelsColunas[coluna] || coluna}
+                    <ArrowUpDown className="h-4 w-4" />
+                    {colunaOrdenada === coluna && (
+                      <span className="text-xs">
+                        {direcaoOrdenacao === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
                 </TableHead>
               ))}
             </TableRow>

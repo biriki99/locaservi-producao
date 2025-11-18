@@ -23,9 +23,11 @@ interface FiltrosServicosProps {
   onFiltrosChange: (filtros: any) => void;
   clientes: Cliente[];
   categorias: Categoria[];
+  ordenacao?: string;
+  onOrdenacaoChange?: (ordenacao: string) => void;
 }
 
-export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias }: FiltrosServicosProps) => {
+export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias, ordenacao, onOrdenacaoChange }: FiltrosServicosProps) => {
   const limparFiltros = () => {
     onFiltrosChange({
       data_inicio: "",
@@ -136,6 +138,31 @@ export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias
           onChange={(e) => onFiltrosChange({ ...filtros, data_fim: e.target.value })}
           className="w-[150px]"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm">Ordenar por</Label>
+        <Select
+          value={ordenacao || "padrao"}
+          onValueChange={(value) => onOrdenacaoChange?.(value)}
+        >
+          <SelectTrigger className="w-[220px]">
+            <SelectValue placeholder="Ordem padrão" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="padrao">Ordem padrão</SelectItem>
+            <SelectItem value="data_asc">Data: Mais antigo → Mais novo</SelectItem>
+            <SelectItem value="data_desc">Data: Mais novo → Mais antigo</SelectItem>
+            <SelectItem value="valor_desc">Valor: Maior primeiro</SelectItem>
+            <SelectItem value="valor_asc">Valor: Menor primeiro</SelectItem>
+            <SelectItem value="titulo_asc">Título: A → Z</SelectItem>
+            <SelectItem value="titulo_desc">Título: Z → A</SelectItem>
+            <SelectItem value="categoria_asc">Categoria: A → Z</SelectItem>
+            <SelectItem value="categoria_desc">Categoria: Z → A</SelectItem>
+            <SelectItem value="status_asc">Status: Crescente</SelectItem>
+            <SelectItem value="status_desc">Status: Decrescente</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Button
