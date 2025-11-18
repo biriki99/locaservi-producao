@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FileText, Eraser } from "lucide-react";
+import { FileText, Eraser, RotateCcw } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
 import { TipoRelatorio, FiltrosServicos, FiltrosClientes, FiltrosCategorias } from "@/types/relatorios";
 import { TipoRelatorioSelector } from "@/components/relatorios/TipoRelatorioSelector";
@@ -10,12 +10,22 @@ import { FiltrosClientesComponent } from "@/components/relatorios/FiltrosCliente
 import { FiltrosCategoriasComponent } from "@/components/relatorios/FiltrosCategorias";
 import { TabelaRelatorio } from "@/components/relatorios/TabelaRelatorio";
 import { ExportButtons } from "@/components/relatorios/ExportButtons";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const Relatorios = () => {
   const { servicos, clientes, categorias } = useData();
   
   const [tipoRelatorio, setTipoRelatorio] = useState<TipoRelatorio>('servicos');
   const [relatorioGerado, setRelatorioGerado] = useState(false);
+  const [dadosOrdenados, setDadosOrdenados] = useState<any[]>([]);
+  const [ordemCustomizada, setOrdemCustomizada] = useState(false);
+  const [ordenacaoAtiva, setOrdenacaoAtiva] = useState<{
+    coluna: string;
+    direcao: 'asc' | 'desc';
+  } | null>(null);
 
   // Estados de filtros
   const [filtrosServicos, setFiltrosServicos] = useState<FiltrosServicos>({
@@ -210,12 +220,88 @@ const Relatorios = () => {
     return undefined;
   }, [dadosRelatorio, tipoRelatorio, filtrosServicos]);
 
+  // Sincronizar dados ordenados com dadosRelatorio quando não está customizado
+  useEffect(() => {
+    if (relatorioGerado && !ordemCustomizada) {
+      setDadosOrdenados(dadosRelatorio);
+    }
+  }, [dadosRelatorio, relatorioGerado, ordemCustomizada]);
+
+  // Configurar sensores para drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Evita drag acidental em cliques
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setDadosOrdenados((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+      if (!ordemCustomizada) {
+        setOrdemCustomizada(true);
+        toast.success("Ordem personalizada aplicada");
+      }
+    }
+  };
+
+  const restaurarOrdemOriginal = () => {
+    setDadosOrdenados([...dadosRelatorio]);
+    setOrdemCustomizada(false);
+    setOrdenacaoAtiva(null);
+    toast.info("Ordem original restaurada");
+  };
+
+  const handleSort = (coluna: string, direcao: 'asc' | 'desc') => {
+    if (!coluna) {
+      // Resetar ordenação
+      setOrdenacaoAtiva(null);
+      setDadosOrdenados([...dadosRelatorio]);
+      return;
+    }
+    
+    setOrdenacaoAtiva({ coluna, direcao });
+    
+    const dadosParaOrdenar = ordemCustomizada ? dadosOrdenados : dadosRelatorio;
+    const dadosOrdenadosNovos = [...dadosParaOrdenar].sort((a, b) => {
+      let valorA = a[coluna];
+      let valorB = b[coluna];
+      
+      // Tratamento especial para datas
+      if (coluna.includes('data')) {
+        valorA = new Date(valorA).getTime();
+        valorB = new Date(valorB).getTime();
+      }
+      
+      // Tratamento especial para valores numéricos
+      if (typeof valorA === 'number' && typeof valorB === 'number') {
+        return direcao === 'asc' ? valorA - valorB : valorB - valorA;
+      }
+      
+      // Tratamento para strings
+      const comparison = String(valorA).localeCompare(String(valorB), 'pt-BR');
+      return direcao === 'asc' ? comparison : -comparison;
+    });
+    
+    setDadosOrdenados(dadosOrdenadosNovos);
+  };
+
   const handleGerarRelatorio = () => {
     setRelatorioGerado(true);
+    setOrdemCustomizada(false);
   };
 
   const handleLimparFiltros = () => {
     setRelatorioGerado(false);
+    setOrdemCustomizada(false);
     if (tipoRelatorio === 'servicos') {
       setFiltrosServicos({
         somar_valores: true,
@@ -236,6 +322,7 @@ const Relatorios = () => {
   const handleTipoChange = (tipo: TipoRelatorio) => {
     setTipoRelatorio(tipo);
     setRelatorioGerado(false);
+    setOrdemCustomizada(false);
   };
 
   return (
@@ -292,29 +379,66 @@ const Relatorios = () => {
       {/* Área de Resultados */}
       {relatorioGerado && (
         <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">
-              Resultados {dadosRelatorio.length > 0 && `(${dadosRelatorio.length} registros)`}
-            </h2>
-            <ExportButtons
-              dados={dadosRelatorio}
-              colunas={colunas}
-              labelsColunas={labelsColunas}
-              nomeArquivo={`relatorio-${tipoRelatorio}-${new Date().toISOString().split('T')[0]}`}
-              titulo={`Relatório de ${tipoRelatorio.charAt(0).toUpperCase() + tipoRelatorio.slice(1)}`}
-              mostrarTotal={totalValor !== undefined}
-              totalValor={totalValor}
-            />
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">Resultados do Relatório</h2>
+              {ordemCustomizada && (
+                <Badge variant="secondary" className="gap-1">
+                  Ordem personalizada
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {ordemCustomizada && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={restaurarOrdemOriginal}
+                  className="gap-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Restaurar ordem original
+                </Button>
+              )}
+              <ExportButtons
+                dados={dadosOrdenados.length > 0 ? dadosOrdenados : dadosRelatorio}
+                colunas={colunas}
+                labelsColunas={labelsColunas}
+                nomeArquivo={`relatorio-${tipoRelatorio}`}
+                titulo={`Relatório de ${tipoRelatorio}`}
+                mostrarTotal={
+                  (tipoRelatorio === 'servicos' && filtrosServicos.somar_valores) ||
+                  tipoRelatorio === 'categorias'
+                }
+                totalValor={totalValor}
+              />
+            </div>
           </div>
-
-          <TabelaRelatorio
-            dados={dadosRelatorio}
-            tipo={tipoRelatorio}
-            colunas={colunas}
-            labelsColunas={labelsColunas}
-            mostrarTotal={totalValor !== undefined}
-            totalValor={totalValor}
-          />
+          
+          <DndContext 
+            sensors={sensors} 
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext 
+              items={dadosOrdenados.length > 0 ? dadosOrdenados.map(d => d.id) : dadosRelatorio.map(d => d.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <TabelaRelatorio
+                dados={dadosOrdenados.length > 0 ? dadosOrdenados : dadosRelatorio}
+                tipo={tipoRelatorio}
+                colunas={colunas}
+                labelsColunas={labelsColunas}
+                mostrarTotal={
+                  (tipoRelatorio === 'servicos' && filtrosServicos.somar_valores) ||
+                  tipoRelatorio === 'categorias'
+                }
+                totalValor={totalValor}
+                isDraggable={true}
+                onSort={handleSort}
+              />
+            </SortableContext>
+          </DndContext>
         </Card>
       )}
     </div>
