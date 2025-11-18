@@ -53,6 +53,7 @@ export default function Servicos() {
   });
   const [servicosOrdenados, setServicosOrdenados] = useState<Servico[]>([]);
   const [ordemCustomizada, setOrdemCustomizada] = useState(false);
+  const [ordenacaoAutomatica, setOrdenacaoAutomatica] = useState<string>("padrao");
 
   const canEdit = isAdmin;
 
@@ -213,12 +214,77 @@ export default function Servicos() {
     return clienteMatch && maquinaMatch && statusCobrancaMatch && statusMatch && dataMatch;
   });
 
+  // Função para aplicar ordenação automática
+  const aplicarOrdenacaoAutomatica = (servicos: Servico[], tipo: string): Servico[] => {
+    if (tipo === "padrao") return servicos;
+    
+    const servicosOrdenados = [...servicos];
+    
+    switch (tipo) {
+      case "data_asc":
+        return servicosOrdenados.sort((a, b) => 
+          new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime()
+        );
+      
+      case "data_desc":
+        return servicosOrdenados.sort((a, b) => 
+          new Date(b.data_inicio).getTime() - new Date(a.data_inicio).getTime()
+        );
+      
+      case "valor_desc":
+        return servicosOrdenados.sort((a, b) => b.valor - a.valor);
+      
+      case "valor_asc":
+        return servicosOrdenados.sort((a, b) => a.valor - b.valor);
+      
+      case "titulo_asc":
+        return servicosOrdenados.sort((a, b) => 
+          a.titulo_servico.localeCompare(b.titulo_servico, 'pt-BR')
+        );
+      
+      case "titulo_desc":
+        return servicosOrdenados.sort((a, b) => 
+          b.titulo_servico.localeCompare(a.titulo_servico, 'pt-BR')
+        );
+      
+      case "categoria_asc":
+        return servicosOrdenados.sort((a, b) => {
+          const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
+          const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
+          return catA.localeCompare(catB, 'pt-BR');
+        });
+      
+      case "categoria_desc":
+        return servicosOrdenados.sort((a, b) => {
+          const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
+          const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
+          return catB.localeCompare(catA, 'pt-BR');
+        });
+      
+      case "status_asc":
+        const ordemStatusAsc = { "pendente": 1, "concluido": 2, "cancelado": 3 };
+        return servicosOrdenados.sort((a, b) => 
+          (ordemStatusAsc[a.status] || 99) - (ordemStatusAsc[b.status] || 99)
+        );
+      
+      case "status_desc":
+        const ordemStatusDesc = { "cancelado": 1, "concluido": 2, "pendente": 3 };
+        return servicosOrdenados.sort((a, b) => 
+          (ordemStatusDesc[a.status] || 99) - (ordemStatusDesc[b.status] || 99)
+        );
+      
+      default:
+        return servicosOrdenados;
+    }
+  };
+
   // Sincronizar servicosOrdenados com servicosFiltrados quando não está customizado
   useEffect(() => {
     if (!ordemCustomizada) {
-      setServicosOrdenados(servicosFiltrados);
+      const servicosComOrdenacao = aplicarOrdenacaoAutomatica(servicosFiltrados, ordenacaoAutomatica);
+      setServicosOrdenados(servicosComOrdenacao);
     }
-  }, [servicosFiltrados, ordemCustomizada]);
+  }, [servicosFiltrados, ordemCustomizada, ordenacaoAutomatica, categorias]);
 
   // Configurar sensores para drag-and-drop
   const sensors = useSensors(
@@ -247,9 +313,24 @@ export default function Servicos() {
   };
 
   const restaurarOrdemOriginal = () => {
+    setOrdenacaoAutomatica("padrao");
     setServicosOrdenados(servicosFiltrados);
     setOrdemCustomizada(false);
     toast.info("Ordem original restaurada");
+  };
+
+  const handleOrdenacaoChange = (novaOrdenacao: string) => {
+    setOrdenacaoAutomatica(novaOrdenacao);
+    
+    // Se há ordem customizada (drag-and-drop), avisar que será resetada
+    if (ordemCustomizada && novaOrdenacao !== "padrao") {
+      setOrdemCustomizada(false);
+      toast.info("Ordem manual foi resetada para aplicar ordenação automática");
+    }
+    
+    if (novaOrdenacao !== "padrao") {
+      toast.success("Ordenação automática aplicada");
+    }
   };
 
   const columns = [
@@ -289,16 +370,23 @@ export default function Servicos() {
               Ordem personalizada
             </Badge>
           )}
-          {ordemCustomizada && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={restaurarOrdemOriginal}
-              className="gap-2"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Restaurar ordem
-            </Button>
+          {(ordemCustomizada || ordenacaoAutomatica !== "padrao") && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={restaurarOrdemOriginal}
+                className="gap-2"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Restaurar ordem
+              </Button>
+              {ordenacaoAutomatica !== "padrao" && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                  Ordenação automática ativa
+                </Badge>
+              )}
+            </>
           )}
           <Button
             variant={viewMode === 'cards' ? 'default' : 'outline'}
@@ -326,10 +414,12 @@ export default function Servicos() {
       </div>
 
       <FiltrosServicos 
-        filtros={filtrosLocais}
+        filtros={filtrosLocais} 
         onFiltrosChange={setFiltrosLocais}
         clientes={clientes}
         categorias={categorias}
+        ordenacao={ordenacaoAutomatica}
+        onOrdenacaoChange={handleOrdenacaoChange}
       />
 
       {viewMode === 'cards' ? (

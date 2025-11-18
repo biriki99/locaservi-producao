@@ -22,6 +22,10 @@ const Relatorios = () => {
   const [relatorioGerado, setRelatorioGerado] = useState(false);
   const [dadosOrdenados, setDadosOrdenados] = useState<any[]>([]);
   const [ordemCustomizada, setOrdemCustomizada] = useState(false);
+  const [ordenacaoAtiva, setOrdenacaoAtiva] = useState<{
+    coluna: string;
+    direcao: 'asc' | 'desc';
+  } | null>(null);
 
   // Estados de filtros
   const [filtrosServicos, setFiltrosServicos] = useState<FiltrosServicos>({
@@ -250,9 +254,44 @@ const Relatorios = () => {
   };
 
   const restaurarOrdemOriginal = () => {
-    setDadosOrdenados(dadosRelatorio);
+    setDadosOrdenados([...dadosRelatorio]);
     setOrdemCustomizada(false);
+    setOrdenacaoAtiva(null);
     toast.info("Ordem original restaurada");
+  };
+
+  const handleSort = (coluna: string, direcao: 'asc' | 'desc') => {
+    if (!coluna) {
+      // Resetar ordenação
+      setOrdenacaoAtiva(null);
+      setDadosOrdenados([...dadosRelatorio]);
+      return;
+    }
+    
+    setOrdenacaoAtiva({ coluna, direcao });
+    
+    const dadosParaOrdenar = ordemCustomizada ? dadosOrdenados : dadosRelatorio;
+    const dadosOrdenadosNovos = [...dadosParaOrdenar].sort((a, b) => {
+      let valorA = a[coluna];
+      let valorB = b[coluna];
+      
+      // Tratamento especial para datas
+      if (coluna.includes('data')) {
+        valorA = new Date(valorA).getTime();
+        valorB = new Date(valorB).getTime();
+      }
+      
+      // Tratamento especial para valores numéricos
+      if (typeof valorA === 'number' && typeof valorB === 'number') {
+        return direcao === 'asc' ? valorA - valorB : valorB - valorA;
+      }
+      
+      // Tratamento para strings
+      const comparison = String(valorA).localeCompare(String(valorB), 'pt-BR');
+      return direcao === 'asc' ? comparison : -comparison;
+    });
+    
+    setDadosOrdenados(dadosOrdenadosNovos);
   };
 
   const handleGerarRelatorio = () => {
@@ -396,6 +435,7 @@ const Relatorios = () => {
                 }
                 totalValor={totalValor}
                 isDraggable={true}
+                onSort={handleSort}
               />
             </SortableContext>
           </DndContext>
