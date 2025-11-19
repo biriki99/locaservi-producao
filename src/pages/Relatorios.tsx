@@ -10,8 +10,6 @@ import { FiltrosClientesComponent } from "@/components/relatorios/FiltrosCliente
 import { FiltrosCategoriasComponent } from "@/components/relatorios/FiltrosCategorias";
 import { TabelaRelatorio } from "@/components/relatorios/TabelaRelatorio";
 import { ExportButtons } from "@/components/relatorios/ExportButtons";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -21,11 +19,11 @@ const Relatorios = () => {
   const [tipoRelatorio, setTipoRelatorio] = useState<TipoRelatorio>('servicos');
   const [relatorioGerado, setRelatorioGerado] = useState(false);
   const [dadosOrdenados, setDadosOrdenados] = useState<any[]>([]);
-  const [ordemCustomizada, setOrdemCustomizada] = useState(false);
   const [ordenacaoAtiva, setOrdenacaoAtiva] = useState<{
     coluna: string;
     direcao: 'asc' | 'desc';
   } | null>(null);
+  const [inverterOrdem, setInverterOrdem] = useState(false);
 
   // Estados de filtros
   const [filtrosServicos, setFiltrosServicos] = useState<FiltrosServicos>({
