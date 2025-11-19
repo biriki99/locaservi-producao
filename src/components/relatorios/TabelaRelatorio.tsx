@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
-import { SortableTableRow } from "@/components/shared/SortableTableRow";
+
 import { ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 
@@ -10,11 +10,10 @@ interface Props {
   labelsColunas: Record<string, string>;
   mostrarTotal?: boolean;
   totalValor?: number;
-  isDraggable?: boolean;
   onSort?: (coluna: string, direcao: 'asc' | 'desc') => void;
 }
 
-export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTotal, totalValor, isDraggable = false, onSort }: Props) => {
+export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTotal, totalValor, onSort }: Props) => {
   const [colunaOrdenada, setColunaOrdenada] = useState<string | null>(null);
   const [direcaoOrdenacao, setDirecaoOrdenacao] = useState<'asc' | 'desc'>('asc');
 
@@ -77,7 +76,6 @@ export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTo
         <Table>
           <TableHeader>
             <TableRow>
-              {isDraggable && <TableHead className="w-12"></TableHead>}
               {colunas.map(coluna => (
                 <TableHead key={coluna} className="font-semibold">
                   <button
@@ -97,29 +95,15 @@ export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTo
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dados.map((row, idx) => {
-              if (isDraggable && row.id) {
-                return (
-                  <SortableTableRow key={row.id} id={row.id}>
-                    {colunas.map(coluna => (
-                      <TableCell key={coluna}>
-                        {formatarValor(row[coluna], coluna)}
-                      </TableCell>
-                    ))}
-                  </SortableTableRow>
-                );
-              }
-              
-              return (
-                <TableRow key={idx}>
-                  {colunas.map(coluna => (
-                    <TableCell key={coluna}>
-                      {formatarValor(row[coluna], coluna)}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
+            {dados.map((row, index) => (
+              <TableRow key={row.id || index}>
+                {colunas.map((coluna) => (
+                  <TableCell key={coluna}>
+                    {formatarValor(row[coluna], coluna)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
           </TableBody>
           {mostrarTotal && totalValor !== undefined && (
             <TableFooter>

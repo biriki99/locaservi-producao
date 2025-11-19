@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SortableTableRow } from "@/components/shared/SortableTableRow";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +35,6 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   canEdit?: boolean;
   canDelete?: boolean;
-  isDraggable?: boolean;
 }
 
 export function DataTable<T extends { id: string }>({
@@ -47,8 +46,7 @@ export function DataTable<T extends { id: string }>({
   searchPlaceholder = "Buscar...",
   emptyMessage = "Nenhum registro encontrado",
   canEdit = true,
-  canDelete = true,
-  isDraggable = false
+  canDelete = true
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -116,7 +114,6 @@ export function DataTable<T extends { id: string }>({
         <Table>
           <TableHeader>
             <TableRow>
-              {isDraggable && <TableHead className="w-12"></TableHead>}
               {columns.map((column) => (
                 <TableHead
                   key={String(column.header)}
@@ -138,7 +135,7 @@ export function DataTable<T extends { id: string }>({
             {sortedData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length + (isDraggable ? 1 : 0) + (onView || onEdit || onDelete ? 1 : 0)}
+                  colSpan={columns.length + (onView || onEdit || onDelete ? 1 : 0)}
                   className="h-24 text-center"
                 >
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -147,93 +144,47 @@ export function DataTable<T extends { id: string }>({
                 </TableCell>
               </TableRow>
             ) : (
-              sortedData.map((item) => {
-                if (isDraggable) {
-                  return (
-                    <SortableTableRow key={item.id} id={item.id}>
-                      {columns.map((column, idx) => (
-                        <TableCell key={idx}>{getCellValue(item, column)}</TableCell>
-                      ))}
-                      {(onView || onEdit || onDelete) && (
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {onView && (
-                                <DropdownMenuItem onClick={() => onView(item)}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  Visualizar
-                                </DropdownMenuItem>
-                              )}
-                              {onEdit && canEdit && (
-                                <DropdownMenuItem onClick={() => onEdit(item)}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Editar
-                                </DropdownMenuItem>
-                              )}
-                              {onDelete && canDelete && (
-                                <DropdownMenuItem
-                                  onClick={() => onDelete(item)}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Excluir
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      )}
-                    </SortableTableRow>
-                  );
-                }
-                
-                return (
-                  <TableRow key={item.id}>
-                    {columns.map((column, idx) => (
-                      <TableCell key={idx}>{getCellValue(item, column)}</TableCell>
-                    ))}
-                    {(onView || onEdit || onDelete) && (
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {onView && (
-                              <DropdownMenuItem onClick={() => onView(item)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Visualizar
-                              </DropdownMenuItem>
-                            )}
-                            {onEdit && canEdit && (
-                              <DropdownMenuItem onClick={() => onEdit(item)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                            )}
-                            {onDelete && canDelete && (
-                              <DropdownMenuItem
-                                onClick={() => onDelete(item)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Excluir
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })
+              sortedData.map((item) => (
+                <TableRow key={item.id}>
+                  {columns.map((column, idx) => (
+                    <TableCell key={idx}>{getCellValue(item, column)}</TableCell>
+                  ))}
+                  {(onView || onEdit || onDelete) && (
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {onView && (
+                            <DropdownMenuItem onClick={() => onView(item)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Visualizar
+                            </DropdownMenuItem>
+                          )}
+                          {onEdit && canEdit && (
+                            <DropdownMenuItem onClick={() => onEdit(item)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                          )}
+                          {onDelete && canDelete && (
+                            <DropdownMenuItem
+                              onClick={() => onDelete(item)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>

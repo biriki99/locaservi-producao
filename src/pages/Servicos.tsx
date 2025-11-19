@@ -4,9 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import { DataTable } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { SortableServicoCard } from "@/components/servicos/SortableServicoCard";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Grid, List, RotateCcw } from "lucide-react";
+import { Plus, Grid, List, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Servico } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -39,8 +36,10 @@ export default function Servicos() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isClienteDialogOpen, setIsClienteDialogOpen] = useState(false);
   const [editingServico, setEditingServico] = useState<Servico | null>(null);
   const [viewingServico, setViewingServico] = useState<Servico | null>(null);
+  const [viewingCliente, setViewingCliente] = useState<Cliente | null>(null);
   const [formData, setFormData] = useState<Partial<Servico>>({});
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
   const [filtrosLocais, setFiltrosLocais] = useState({
@@ -51,8 +50,6 @@ export default function Servicos() {
     status_cobranca: "all",
     status: "all"
   });
-  const [servicosOrdenados, setServicosOrdenados] = useState<Servico[]>([]);
-  const [ordemCustomizada, setOrdemCustomizada] = useState(false);
   const [ordenacaoAutomatica, setOrdenacaoAutomatica] = useState<string>("padrao");
 
   const canEdit = isAdmin;
@@ -116,6 +113,14 @@ export default function Servicos() {
   const handleView = (servico: Servico) => {
     setViewingServico(servico);
     setIsViewDialogOpen(true);
+  };
+
+  const handleViewCliente = (clienteId: string) => {
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (cliente) {
+      setViewingCliente(cliente);
+      setIsClienteDialogOpen(true);
+    }
   };
 
   const handleDelete = (servico: Servico) => {
@@ -687,7 +692,17 @@ export default function Servicos() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label className="text-sm font-semibold text-muted-foreground">Cliente</Label>
-                  <p className="text-base">{clientes.find(c => c.id === viewingServico.cliente_id)?.nome || "N/A"}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-base">{clientes.find(c => c.id === viewingServico.cliente_id)?.nome || "N/A"}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewCliente(viewingServico.cliente_id)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver Detalhes
+                    </Button>
+                  </div>
                 </div>
                 <div>
                   <Label className="text-sm font-semibold text-muted-foreground">Máquina</Label>
