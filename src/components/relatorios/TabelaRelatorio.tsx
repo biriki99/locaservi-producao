@@ -108,7 +108,7 @@ export const TabelaRelatorio = ({ dados, tipo, colunas, labelsColunas, mostrarTo
           {mostrarTotal && totalValor !== undefined && (
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={(isDraggable ? colunas.length : colunas.length - 1)} className="text-right font-semibold">
+                <TableCell colSpan={colunas.length - 1} className="text-right font-semibold">
                   TOTAL:
                 </TableCell>
                 <TableCell className="font-bold text-lg">

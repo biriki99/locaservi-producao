@@ -21,9 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Grid, List, Eye } from "lucide-react";
+import { Plus, Grid, List, Eye, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-import { Servico } from "@/types";
+import { Servico, Cliente } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { FiltrosServicos } from "@/components/servicos/FiltrosServicos";
 import { ServicoCard } from "@/components/servicos/ServicoCard";
@@ -220,118 +220,70 @@ export default function Servicos() {
   });
 
   // Função para aplicar ordenação automática
-  const aplicarOrdenacaoAutomatica = (servicos: Servico[], tipo: string): Servico[] => {
-    if (tipo === "padrao") return servicos;
+  const aplicarOrdenacaoAutomatica = (servicosArray: Servico[], tipoOrdenacao: string) => {
+    if (tipoOrdenacao === "padrao") return servicosArray;
     
-    const servicosOrdenados = [...servicos];
+    const sortedArray = [...servicosArray];
     
-    switch (tipo) {
-      case "data_asc":
-        return servicosOrdenados.sort((a, b) => 
-          new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime()
-        );
+    switch (tipoOrdenacao) {
+      case "data_mais_antigo":
+        return sortedArray.sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime());
       
-      case "data_desc":
-        return servicosOrdenados.sort((a, b) => 
-          new Date(b.data_inicio).getTime() - new Date(a.data_inicio).getTime()
-        );
+      case "data_mais_recente":
+        return sortedArray.sort((a, b) => new Date(b.data_inicio).getTime() - new Date(a.data_inicio).getTime());
       
-      case "valor_desc":
-        return servicosOrdenados.sort((a, b) => b.valor - a.valor);
+      case "valor_maior":
+        return sortedArray.sort((a, b) => b.valor - a.valor);
       
-      case "valor_asc":
-        return servicosOrdenados.sort((a, b) => a.valor - b.valor);
+      case "valor_menor":
+        return sortedArray.sort((a, b) => a.valor - b.valor);
       
-      case "titulo_asc":
-        return servicosOrdenados.sort((a, b) => 
-          a.titulo_servico.localeCompare(b.titulo_servico, 'pt-BR')
-        );
+      case "titulo_az":
+        return sortedArray.sort((a, b) => a.titulo_servico.localeCompare(b.titulo_servico));
       
-      case "titulo_desc":
-        return servicosOrdenados.sort((a, b) => 
-          b.titulo_servico.localeCompare(a.titulo_servico, 'pt-BR')
-        );
+      case "titulo_za":
+        return sortedArray.sort((a, b) => b.titulo_servico.localeCompare(a.titulo_servico));
       
-      case "categoria_asc":
-        return servicosOrdenados.sort((a, b) => {
+      case "categoria_az":
+        return sortedArray.sort((a, b) => {
           const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
           const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
-          return catA.localeCompare(catB, 'pt-BR');
+          return catA.localeCompare(catB);
         });
       
-      case "categoria_desc":
-        return servicosOrdenados.sort((a, b) => {
+      case "categoria_za":
+        return sortedArray.sort((a, b) => {
           const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
           const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
-          return catB.localeCompare(catA, 'pt-BR');
+          return catB.localeCompare(catA);
         });
       
-      case "status_asc":
-        const ordemStatusAsc = { "pendente": 1, "concluido": 2, "cancelado": 3 };
-        return servicosOrdenados.sort((a, b) => 
-          (ordemStatusAsc[a.status] || 99) - (ordemStatusAsc[b.status] || 99)
-        );
+      case "status_crescente":
+        return sortedArray.sort((a, b) => a.status.localeCompare(b.status));
       
-      case "status_desc":
-        const ordemStatusDesc = { "cancelado": 1, "concluido": 2, "pendente": 3 };
-        return servicosOrdenados.sort((a, b) => 
-          (ordemStatusDesc[a.status] || 99) - (ordemStatusDesc[b.status] || 99)
-        );
+      case "status_decrescente":
+        return sortedArray.sort((a, b) => b.status.localeCompare(a.status));
+      
+      case "cobranca_pago":
+        return sortedArray.sort((a, b) => (a.status_cobranca === "pago" ? -1 : 1));
+      
+      case "cobranca_receber":
+        return sortedArray.sort((a, b) => (a.status_cobranca === "a_receber" ? -1 : 1));
       
       default:
-        return servicosOrdenados;
+        return servicosArray;
     }
   };
 
-  // Sincronizar servicosOrdenados com servicosFiltrados quando não está customizado
-  useEffect(() => {
-    if (!ordemCustomizada) {
-      const servicosComOrdenacao = aplicarOrdenacaoAutomatica(servicosFiltrados, ordenacaoAutomatica);
-      setServicosOrdenados(servicosComOrdenacao);
-    }
-  }, [servicosFiltrados, ordemCustomizada, ordenacaoAutomatica, categorias]);
-
-  // Configurar sensores para drag-and-drop
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor)
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setServicosOrdenados((items) => {
-        const oldIndex = items.findIndex((i) => i.id === active.id);
-        const newIndex = items.findIndex((i) => i.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-      if (!ordemCustomizada) {
-        setOrdemCustomizada(true);
-        toast.success("Ordem personalizada aplicada");
-      }
-    }
-  };
+  const servicosExibidos = aplicarOrdenacaoAutomatica(servicosFiltrados, ordenacaoAutomatica);
 
   const restaurarOrdemOriginal = () => {
     setOrdenacaoAutomatica("padrao");
-    setServicosOrdenados(servicosFiltrados);
-    setOrdemCustomizada(false);
     toast.info("Ordem original restaurada");
   };
 
   const handleOrdenacaoChange = (novaOrdenacao: string) => {
     setOrdenacaoAutomatica(novaOrdenacao);
-    
-    // Se há ordem customizada (drag-and-drop), avisar que será resetada
-    if (ordemCustomizada && novaOrdenacao !== "padrao") {
-      setOrdemCustomizada(false);
-      toast.info("Ordem manual foi resetada para aplicar ordenação automática");
-    }
     
     if (novaOrdenacao !== "padrao") {
       toast.success("Ordenação automática aplicada");
@@ -370,12 +322,7 @@ export default function Servicos() {
           <p className="text-muted-foreground">Gerencie seus serviços e aluguéis</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {ordemCustomizada && (
-            <Badge variant="secondary" className="gap-1 py-2">
-              Ordem personalizada
-            </Badge>
-          )}
-          {(ordemCustomizada || ordenacaoAutomatica !== "padrao") && (
+          {ordenacaoAutomatica !== "padrao" && (
             <>
               <Button 
                 variant="outline" 
@@ -386,11 +333,9 @@ export default function Servicos() {
                 <RotateCcw className="h-4 w-4" />
                 Restaurar ordem
               </Button>
-              {ordenacaoAutomatica !== "padrao" && (
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
-                  Ordenação automática ativa
-                </Badge>
-              )}
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                Ordenação automática ativa
+              </Badge>
             </>
           )}
           <Button
@@ -428,61 +373,38 @@ export default function Servicos() {
       />
 
       {viewMode === 'cards' ? (
-        <DndContext 
-          sensors={sensors} 
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext 
-            items={servicosOrdenados.map(s => s.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {servicosOrdenados.length > 0 ? (
-                servicosOrdenados.map((servico) => (
-                  <SortableServicoCard
-                    key={servico.id}
-                    servico={servico}
-                    cliente={clientes.find(c => c.id === servico.cliente_id)}
-                    categoria={categorias.find(c => c.id === servico.maquina_id)}
-                    onView={() => handleView(servico)}
-                    onEdit={canEdit ? () => handleEdit(servico) : undefined}
-                    onDelete={canEdit ? () => handleDelete(servico) : undefined}
-                    canEdit={canEdit}
-                    canDelete={canEdit}
-                  />
-                ))
-              ) : (
-                <p className="col-span-full text-center text-muted-foreground py-8">
-                  Nenhum serviço encontrado
-                </p>
-              )}
-            </div>
-          </SortableContext>
-        </DndContext>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {servicosExibidos.length > 0 ? (
+            servicosExibidos.map((servico) => (
+              <ServicoCard
+                key={servico.id}
+                servico={servico}
+                cliente={clientes.find(c => c.id === servico.cliente_id)}
+                categoria={categorias.find(c => c.id === servico.maquina_id)}
+                onView={() => handleView(servico)}
+                onEdit={canEdit ? () => handleEdit(servico) : undefined}
+                onDelete={canEdit ? () => handleDelete(servico) : undefined}
+                canEdit={canEdit}
+                canDelete={canEdit}
+              />
+            ))
+          ) : (
+            <p className="col-span-full text-center text-muted-foreground py-8">
+              Nenhum serviço encontrado
+            </p>
+          )}
+        </div>
       ) : (
-        <DndContext 
-          sensors={sensors} 
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext 
-            items={servicosOrdenados.map(s => s.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <DataTable
-              data={servicosOrdenados}
-              columns={columns}
-              onEdit={canEdit ? handleEdit : undefined}
-              onDelete={canEdit ? handleDelete : undefined}
-              searchPlaceholder="Buscar serviços..."
-              emptyMessage="Nenhum serviço cadastrado"
-              canEdit={canEdit}
-              canDelete={canEdit}
-              isDraggable={true}
-            />
-          </SortableContext>
-        </DndContext>
+        <DataTable
+          data={servicosExibidos}
+          columns={columns}
+          onEdit={canEdit ? handleEdit : undefined}
+          onDelete={canEdit ? handleDelete : undefined}
+          searchPlaceholder="Buscar serviços..."
+          emptyMessage="Nenhum serviço cadastrado"
+          canEdit={canEdit}
+          canDelete={canEdit}
+        />
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -767,6 +689,62 @@ export default function Servicos() {
                   Fechar
                 </Button>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualização de Cliente */}
+      <Dialog open={isClienteDialogOpen} onOpenChange={setIsClienteDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Cliente</DialogTitle>
+            <DialogDescription>Informações completas do cliente</DialogDescription>
+          </DialogHeader>
+
+          {viewingCliente && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-semibold text-muted-foreground">Nome</Label>
+                <p className="text-base">{viewingCliente.nome}</p>
+              </div>
+
+              {viewingCliente.cpf_cnpj && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">CPF/CNPJ</Label>
+                  <p className="text-base">{viewingCliente.cpf_cnpj}</p>
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {viewingCliente.telefone && (
+                  <div>
+                    <Label className="text-sm font-semibold text-muted-foreground">Telefone</Label>
+                    <p className="text-base">{viewingCliente.telefone}</p>
+                  </div>
+                )}
+
+                {viewingCliente.email && (
+                  <div>
+                    <Label className="text-sm font-semibold text-muted-foreground">Email</Label>
+                    <p className="text-base">{viewingCliente.email}</p>
+                  </div>
+                )}
+              </div>
+
+              {viewingCliente.endereco && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Endereço</Label>
+                  <p className="text-base whitespace-pre-wrap">{viewingCliente.endereco}</p>
+                </div>
+              )}
+
+              {viewingCliente.observacoes && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Observações</Label>
+                  <p className="text-base whitespace-pre-wrap">{viewingCliente.observacoes}</p>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
