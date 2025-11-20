@@ -23,8 +23,10 @@ export default function Agendamentos() {
   const { user, isAdmin } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isClienteDialogOpen, setIsClienteDialogOpen] = useState(false);
   const [editingAgendamento, setEditingAgendamento] = useState<Agendamento | null>(null);
   const [viewingAgendamento, setViewingAgendamento] = useState<Agendamento | null>(null);
+  const [viewingCliente, setViewingCliente] = useState<import("@/types").Cliente | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
   const [filtrosLocais, setFiltrosLocais] = useState({
     busca: "",
@@ -61,6 +63,14 @@ export default function Agendamentos() {
   const handleView = (agendamento: Agendamento) => {
     setViewingAgendamento(agendamento);
     setIsViewDialogOpen(true);
+  };
+
+  const handleViewCliente = (clienteId: string) => {
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (cliente) {
+      setViewingCliente(cliente);
+      setIsClienteDialogOpen(true);
+    }
   };
 
   // Filtrar agendamentos localmente
@@ -346,7 +356,17 @@ export default function Agendamentos() {
                 </div>
                 <div>
                   <Label className="text-sm text-muted-foreground">Cliente</Label>
-                  <p className="font-medium">{getClienteNome(viewingAgendamento.cliente_id)}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="font-medium">{getClienteNome(viewingAgendamento.cliente_id)}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewCliente(viewingAgendamento.cliente_id)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver Detalhes
+                    </Button>
+                  </div>
                 </div>
                 <div>
                   <Label className="text-sm text-muted-foreground">Data/Hora</Label>
@@ -375,6 +395,64 @@ export default function Agendamentos() {
                 <Label className="text-sm text-muted-foreground">Criado em</Label>
                 <p className="text-sm">{format(new Date(viewingAgendamento.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualização de Cliente */}
+      <Dialog open={isClienteDialogOpen} onOpenChange={setIsClienteDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Cliente</DialogTitle>
+            <DialogDescription>
+              Informações completas do cliente
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewingCliente && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-semibold text-muted-foreground">Nome</Label>
+                <p className="text-base">{viewingCliente.nome}</p>
+              </div>
+
+              {viewingCliente.cpf_cnpj && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">CPF/CNPJ</Label>
+                  <p className="text-base">{viewingCliente.cpf_cnpj}</p>
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {viewingCliente.telefone && (
+                  <div>
+                    <Label className="text-sm font-semibold text-muted-foreground">Telefone</Label>
+                    <p className="text-base">{viewingCliente.telefone}</p>
+                  </div>
+                )}
+
+                {viewingCliente.email && (
+                  <div>
+                    <Label className="text-sm font-semibold text-muted-foreground">Email</Label>
+                    <p className="text-base">{viewingCliente.email}</p>
+                  </div>
+                )}
+              </div>
+
+              {viewingCliente.endereco && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Endereço</Label>
+                  <p className="text-base whitespace-pre-wrap">{viewingCliente.endereco}</p>
+                </div>
+              )}
+
+              {viewingCliente.observacoes && (
+                <div>
+                  <Label className="text-sm font-semibold text-muted-foreground">Observações</Label>
+                  <p className="text-base whitespace-pre-wrap">{viewingCliente.observacoes}</p>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>

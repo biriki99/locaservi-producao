@@ -1,7 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FileText, Eraser, RotateCcw } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FileText, Eraser } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
 import { TipoRelatorio, FiltrosServicos, FiltrosClientes, FiltrosCategorias } from "@/types/relatorios";
 import { TipoRelatorioSelector } from "@/components/relatorios/TipoRelatorioSelector";
@@ -10,10 +11,6 @@ import { FiltrosClientesComponent } from "@/components/relatorios/FiltrosCliente
 import { FiltrosCategoriasComponent } from "@/components/relatorios/FiltrosCategorias";
 import { TabelaRelatorio } from "@/components/relatorios/TabelaRelatorio";
 import { ExportButtons } from "@/components/relatorios/ExportButtons";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 
 const Relatorios = () => {
   const { servicos, clientes, categorias } = useData();
@@ -21,11 +18,11 @@ const Relatorios = () => {
   const [tipoRelatorio, setTipoRelatorio] = useState<TipoRelatorio>('servicos');
   const [relatorioGerado, setRelatorioGerado] = useState(false);
   const [dadosOrdenados, setDadosOrdenados] = useState<any[]>([]);
-  const [ordemCustomizada, setOrdemCustomizada] = useState(false);
   const [ordenacaoAtiva, setOrdenacaoAtiva] = useState<{
     coluna: string;
     direcao: 'asc' | 'desc';
   } | null>(null);
+  const [inverterOrdem, setInverterOrdem] = useState(false);
 
   // Estados de filtros
   const [filtrosServicos, setFiltrosServicos] = useState<FiltrosServicos>({
@@ -220,49 +217,8 @@ const Relatorios = () => {
     return undefined;
   }, [dadosRelatorio, tipoRelatorio, filtrosServicos]);
 
-  // Sincronizar dados ordenados com dadosRelatorio quando não está customizado
-  useEffect(() => {
-    if (relatorioGerado && !ordemCustomizada) {
-      setDadosOrdenados(dadosRelatorio);
-    }
-  }, [dadosRelatorio, relatorioGerado, ordemCustomizada]);
-
-  // Configurar sensores para drag-and-drop
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // Evita drag acidental em cliques
-      },
-    }),
-    useSensor(KeyboardSensor)
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setDadosOrdenados((items) => {
-        const oldIndex = items.findIndex((i) => i.id === active.id);
-        const newIndex = items.findIndex((i) => i.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-      if (!ordemCustomizada) {
-        setOrdemCustomizada(true);
-        toast.success("Ordem personalizada aplicada");
-      }
-    }
-  };
-
-  const restaurarOrdemOriginal = () => {
-    setDadosOrdenados([...dadosRelatorio]);
-    setOrdemCustomizada(false);
-    setOrdenacaoAtiva(null);
-    toast.info("Ordem original restaurada");
-  };
-
   const handleSort = (coluna: string, direcao: 'asc' | 'desc') => {
     if (!coluna) {
-      // Resetar ordenação
       setOrdenacaoAtiva(null);
       setDadosOrdenados([...dadosRelatorio]);
       return;
@@ -270,23 +226,19 @@ const Relatorios = () => {
     
     setOrdenacaoAtiva({ coluna, direcao });
     
-    const dadosParaOrdenar = ordemCustomizada ? dadosOrdenados : dadosRelatorio;
-    const dadosOrdenadosNovos = [...dadosParaOrdenar].sort((a, b) => {
+    const dadosOrdenadosNovos = [...dadosRelatorio].sort((a, b) => {
       let valorA = a[coluna];
       let valorB = b[coluna];
       
-      // Tratamento especial para datas
       if (coluna.includes('data')) {
         valorA = new Date(valorA).getTime();
         valorB = new Date(valorB).getTime();
       }
       
-      // Tratamento especial para valores numéricos
       if (typeof valorA === 'number' && typeof valorB === 'number') {
         return direcao === 'asc' ? valorA - valorB : valorB - valorA;
       }
       
-      // Tratamento para strings
       const comparison = String(valorA).localeCompare(String(valorB), 'pt-BR');
       return direcao === 'asc' ? comparison : -comparison;
     });
@@ -296,12 +248,12 @@ const Relatorios = () => {
 
   const handleGerarRelatorio = () => {
     setRelatorioGerado(true);
-    setOrdemCustomizada(false);
+    setInverterOrdem(false);
   };
 
   const handleLimparFiltros = () => {
     setRelatorioGerado(false);
-    setOrdemCustomizada(false);
+    setInverterOrdem(false);
     if (tipoRelatorio === 'servicos') {
       setFiltrosServicos({
         somar_valores: true,
@@ -322,12 +274,16 @@ const Relatorios = () => {
   const handleTipoChange = (tipo: TipoRelatorio) => {
     setTipoRelatorio(tipo);
     setRelatorioGerado(false);
-    setOrdemCustomizada(false);
+    setInverterOrdem(false);
   };
+
+  const dadosParaExibir = useMemo(() => {
+    const dados = dadosOrdenados.length > 0 ? dadosOrdenados : dadosRelatorio;
+    return inverterOrdem ? [...dados].reverse() : dados;
+  }, [dadosOrdenados, dadosRelatorio, inverterOrdem]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Relatórios</h1>
@@ -335,35 +291,77 @@ const Relatorios = () => {
         </div>
       </div>
 
-      {/* Seletor de Tipo */}
       <Card className="p-6">
         <TipoRelatorioSelector valor={tipoRelatorio} onChange={handleTipoChange} />
       </Card>
 
-      {/* Painel de Filtros */}
       <Card className="p-6">
         {tipoRelatorio === 'servicos' && (
-          <FiltrosServicosComponent
-            filtros={filtrosServicos}
-            onChange={setFiltrosServicos}
-            clientes={clientes}
-            categorias={categorias}
-          />
+          <>
+            <FiltrosServicosComponent
+              filtros={filtrosServicos}
+              onChange={setFiltrosServicos}
+              clientes={clientes}
+              categorias={categorias}
+            />
+            <div className="flex items-center space-x-2 mt-4">
+              <Checkbox 
+                id="inverter_ordem"
+                checked={inverterOrdem}
+                onCheckedChange={(checked) => setInverterOrdem(checked as boolean)}
+              />
+              <label
+                htmlFor="inverter_ordem"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Inverter a ordem listada
+              </label>
+            </div>
+          </>
         )}
         {tipoRelatorio === 'clientes' && (
-          <FiltrosClientesComponent
-            filtros={filtrosClientes}
-            onChange={setFiltrosClientes}
-          />
+          <>
+            <FiltrosClientesComponent
+              filtros={filtrosClientes}
+              onChange={setFiltrosClientes}
+            />
+            <div className="flex items-center space-x-2 mt-4">
+              <Checkbox 
+                id="inverter_ordem"
+                checked={inverterOrdem}
+                onCheckedChange={(checked) => setInverterOrdem(checked as boolean)}
+              />
+              <label
+                htmlFor="inverter_ordem"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Inverter a ordem listada
+              </label>
+            </div>
+          </>
         )}
         {tipoRelatorio === 'categorias' && (
-          <FiltrosCategoriasComponent
-            filtros={filtrosCategorias}
-            onChange={setFiltrosCategorias}
-          />
+          <>
+            <FiltrosCategoriasComponent
+              filtros={filtrosCategorias}
+              onChange={setFiltrosCategorias}
+            />
+            <div className="flex items-center space-x-2 mt-4">
+              <Checkbox 
+                id="inverter_ordem"
+                checked={inverterOrdem}
+                onCheckedChange={(checked) => setInverterOrdem(checked as boolean)}
+              />
+              <label
+                htmlFor="inverter_ordem"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Inverter a ordem listada
+              </label>
+            </div>
+          </>
         )}
 
-        {/* Botões de Ação */}
         <div className="flex gap-3 mt-6 pt-4 border-t">
           <Button onClick={handleGerarRelatorio} size="lg">
             <FileText className="mr-2 h-5 w-5" />
@@ -376,32 +374,15 @@ const Relatorios = () => {
         </div>
       </Card>
 
-      {/* Área de Resultados */}
       {relatorioGerado && (
         <Card className="p-6 space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-semibold">Resultados do Relatório</h2>
-              {ordemCustomizada && (
-                <Badge variant="secondary" className="gap-1">
-                  Ordem personalizada
-                </Badge>
-              )}
             </div>
             <div className="flex items-center gap-2">
-              {ordemCustomizada && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={restaurarOrdemOriginal}
-                  className="gap-2"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  Restaurar ordem original
-                </Button>
-              )}
               <ExportButtons
-                dados={dadosOrdenados.length > 0 ? dadosOrdenados : dadosRelatorio}
+                dados={dadosParaExibir}
                 colunas={colunas}
                 labelsColunas={labelsColunas}
                 nomeArquivo={`relatorio-${tipoRelatorio}`}
@@ -415,30 +396,18 @@ const Relatorios = () => {
             </div>
           </div>
           
-          <DndContext 
-            sensors={sensors} 
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext 
-              items={dadosOrdenados.length > 0 ? dadosOrdenados.map(d => d.id) : dadosRelatorio.map(d => d.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <TabelaRelatorio
-                dados={dadosOrdenados.length > 0 ? dadosOrdenados : dadosRelatorio}
-                tipo={tipoRelatorio}
-                colunas={colunas}
-                labelsColunas={labelsColunas}
-                mostrarTotal={
-                  (tipoRelatorio === 'servicos' && filtrosServicos.somar_valores) ||
-                  tipoRelatorio === 'categorias'
-                }
-                totalValor={totalValor}
-                isDraggable={true}
-                onSort={handleSort}
-              />
-            </SortableContext>
-          </DndContext>
+          <TabelaRelatorio
+            dados={dadosParaExibir}
+            tipo={tipoRelatorio}
+            colunas={colunas}
+            labelsColunas={labelsColunas}
+            mostrarTotal={
+              (tipoRelatorio === 'servicos' && filtrosServicos.somar_valores) ||
+              tipoRelatorio === 'categorias'
+            }
+            totalValor={totalValor}
+            onSort={handleSort}
+          />
         </Card>
       )}
     </div>
