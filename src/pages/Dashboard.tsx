@@ -212,7 +212,7 @@ export default function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsla(var(--popover), 0.95)",
+                    backgroundColor: "#777E85",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
@@ -222,7 +222,7 @@ export default function Dashboard() {
                 <Line 
                   type="monotone" 
                   dataKey="valor" 
-                  stroke="hsl(var(--chart-1))" 
+                  stroke="hsl(var(--chart-1))"
                   strokeWidth={2}
                   name="Faturamento (R$)"
                 />
@@ -244,7 +244,7 @@ export default function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsla(var(--popover), 0.95)",
+                    backgroundColor: "#777E85",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
@@ -285,7 +285,7 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsla(var(--popover), 0.95)",
+                    backgroundColor: "#777E85",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
@@ -320,7 +320,7 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsla(var(--popover), 0.95)",
+                    backgroundColor: "#777E85",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
@@ -339,20 +339,22 @@ export default function Dashboard() {
           <CardDescription className="text-xs sm:text-sm">Evolução mensal do faturamento de cada categoria em {filtros.ano}</CardDescription>
         </CardHeader>
         <CardContent className="px-2 sm:px-6">
-          <ResponsiveContainer width="100%" height={450}>
-            <LineChart data={faturamentoCategoriasPorMes}>
+          <ResponsiveContainer width="100%" height={550}>
+            <LineChart data={faturamentoCategoriasPorMes} margin={{ bottom: 80 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />
               <YAxis stroke="hsl(var(--muted-foreground))" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "hsla(var(--popover), 0.95)",
+                  backgroundColor: "#777E85",
                   border: "1px solid hsl(var(--border))",
-                  borderRadius: "var(--radius)"
+                  borderRadius: "var(--radius)",
+                  fontSize: "12px"
                 }}
                 formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                position={{ y: 0 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ paddingTop: "20px" }} />
               {categorias.map((cat, index) => (
                 <Line
                   key={cat.id}
