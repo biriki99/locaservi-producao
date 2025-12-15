@@ -214,8 +214,11 @@ export default function Dashboard() {
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)"
+                    borderRadius: "var(--radius)",
+                    color: "hsl(var(--card-foreground))"
                   }}
+                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
+                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
                 <Legend />
@@ -246,8 +249,11 @@ export default function Dashboard() {
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)"
+                    borderRadius: "var(--radius)",
+                    color: "hsl(var(--card-foreground))"
                   }}
+                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
+                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
                 <Legend />
@@ -287,8 +293,11 @@ export default function Dashboard() {
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)"
+                    borderRadius: "var(--radius)",
+                    color: "hsl(var(--card-foreground))"
                   }}
+                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
+                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
               </PieChart>
@@ -322,8 +331,11 @@ export default function Dashboard() {
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)"
+                    borderRadius: "var(--radius)",
+                    color: "hsl(var(--card-foreground))"
                   }}
+                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
+                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
               </PieChart>
@@ -345,11 +357,19 @@ export default function Dashboard() {
               <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />
               <YAxis stroke="hsl(var(--muted-foreground))" />
               <Tooltip
+                wrapperStyle={{
+                  zIndex: 1000,
+                  maxHeight: "250px",
+                  overflowY: "auto"
+                }}
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
-                  borderRadius: "var(--radius)"
+                  borderRadius: "var(--radius)",
+                  color: "hsl(var(--card-foreground))"
                 }}
+                labelStyle={{ color: "hsl(var(--card-foreground))" }}
+                itemStyle={{ color: "hsl(var(--card-foreground))" }}
                 formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               />
               <Legend />
