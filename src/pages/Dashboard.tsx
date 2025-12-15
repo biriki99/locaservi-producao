@@ -212,13 +212,10 @@ export default function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "hsla(var(--popover), 0.95)",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)",
-                    color: "hsl(var(--card-foreground))"
+                    borderRadius: "var(--radius)"
                   }}
-                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
-                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
                 <Legend />
@@ -247,13 +244,10 @@ export default function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "hsla(var(--popover), 0.95)",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)",
-                    color: "hsl(var(--card-foreground))"
+                    borderRadius: "var(--radius)"
                   }}
-                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
-                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
                 <Legend />
@@ -291,13 +285,10 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "hsla(var(--popover), 0.95)",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)",
-                    color: "hsl(var(--card-foreground))"
+                    borderRadius: "var(--radius)"
                   }}
-                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
-                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
               </PieChart>
@@ -329,13 +320,10 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "hsla(var(--popover), 0.95)",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "var(--radius)",
-                    color: "hsl(var(--card-foreground))"
+                    borderRadius: "var(--radius)"
                   }}
-                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
-                  itemStyle={{ color: "hsl(var(--card-foreground))" }}
                   formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 />
               </PieChart>
@@ -351,25 +339,17 @@ export default function Dashboard() {
           <CardDescription className="text-xs sm:text-sm">Evolução mensal do faturamento de cada categoria em {filtros.ano}</CardDescription>
         </CardHeader>
         <CardContent className="px-2 sm:px-6">
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={450}>
             <LineChart data={faturamentoCategoriasPorMes}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="mes" stroke="hsl(var(--muted-foreground))" />
               <YAxis stroke="hsl(var(--muted-foreground))" />
               <Tooltip
-                wrapperStyle={{
-                  zIndex: 1000,
-                  maxHeight: "250px",
-                  overflowY: "auto"
-                }}
                 contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
+                  backgroundColor: "hsla(var(--popover), 0.95)",
                   border: "1px solid hsl(var(--border))",
-                  borderRadius: "var(--radius)",
-                  color: "hsl(var(--card-foreground))"
+                  borderRadius: "var(--radius)"
                 }}
-                labelStyle={{ color: "hsl(var(--card-foreground))" }}
-                itemStyle={{ color: "hsl(var(--card-foreground))" }}
                 formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               />
               <Legend />
