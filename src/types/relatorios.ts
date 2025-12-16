@@ -3,6 +3,7 @@ export type TipoRelatorio = 'servicos' | 'clientes' | 'categorias';
 export interface FiltrosServicos {
   cliente_id?: string;
   status_cobranca?: 'pago' | 'a_receber' | 'all';
+  forma_pagamento?: 'dinheiro' | 'pix' | 'cartao' | 'boleto' | 'a_receber' | 'all';
   data_inicio?: string;
   data_fim?: string;
   categoria_id?: string;
