@@ -285,7 +285,7 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#777E85",
+                    backgroundColor: "hsl(var(--popover))",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
@@ -320,7 +320,7 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#777E85",
+                    backgroundColor: "hsl(var(--popover))",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "var(--radius)"
                   }}
@@ -346,7 +346,7 @@ export default function Dashboard() {
               <YAxis stroke="hsl(var(--muted-foreground))" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#777E85",
+                  backgroundColor: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "var(--radius)",
                   fontSize: "12px"
