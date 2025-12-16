@@ -95,6 +95,27 @@ export const FiltrosServicosComponent = ({ filtros, onChange, clientes, categori
         </Select>
       </div>
 
+      {/* Forma de Pagamento */}
+      <div className="space-y-2">
+        <Label>Forma de Pagamento</Label>
+        <Select
+          value={filtros.forma_pagamento || "all"}
+          onValueChange={(value) => onChange({ ...filtros, forma_pagamento: value as any })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Todas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="dinheiro">Dinheiro</SelectItem>
+            <SelectItem value="pix">Pix</SelectItem>
+            <SelectItem value="cartao">Cartão</SelectItem>
+            <SelectItem value="boleto">Boleto</SelectItem>
+            <SelectItem value="a_receber">A Receber</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Intervalo de Datas */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">

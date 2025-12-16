@@ -19,6 +19,7 @@ interface FiltrosServicosProps {
     maquina_id?: string;
     status_cobranca?: string;
     status?: string;
+    forma_pagamento?: string;
   };
   onFiltrosChange: (filtros: any) => void;
   clientes: Cliente[];
@@ -35,7 +36,8 @@ export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias
       cliente_id: "all",
       maquina_id: "all",
       status_cobranca: "all",
-      status: "all"
+      status: "all",
+      forma_pagamento: "all"
     });
   };
 
@@ -116,6 +118,26 @@ export const FiltrosServicos = ({ filtros, onFiltrosChange, clientes, categorias
             <SelectItem value="pendente">Pendente</SelectItem>
             <SelectItem value="concluido">Concluído</SelectItem>
             <SelectItem value="cancelado">Cancelado</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm">Forma de Pagamento</Label>
+        <Select
+          value={filtros.forma_pagamento || "all"}
+          onValueChange={(value) => onFiltrosChange({ ...filtros, forma_pagamento: value })}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="dinheiro">Dinheiro</SelectItem>
+            <SelectItem value="pix">Pix</SelectItem>
+            <SelectItem value="cartao">Cartão</SelectItem>
+            <SelectItem value="boleto">Boleto</SelectItem>
+            <SelectItem value="a_receber">A Receber</SelectItem>
           </SelectContent>
         </Select>
       </div>

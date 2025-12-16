@@ -48,7 +48,8 @@ export default function Servicos() {
     cliente_id: "all",
     maquina_id: "all",
     status_cobranca: "all",
-    status: "all"
+    status: "all",
+    forma_pagamento: "all"
   });
   const [ordenacaoAutomatica, setOrdenacaoAutomatica] = useState<string>("padrao");
 
@@ -207,6 +208,7 @@ export default function Servicos() {
     const maquinaMatch = filtrosLocais.maquina_id === "all" || s.maquina_id === filtrosLocais.maquina_id;
     const statusCobrancaMatch = filtrosLocais.status_cobranca === "all" || s.status_cobranca === filtrosLocais.status_cobranca;
     const statusMatch = filtrosLocais.status === "all" || s.status === filtrosLocais.status;
+    const formaPagamentoMatch = filtrosLocais.forma_pagamento === "all" || s.forma_pagamento === filtrosLocais.forma_pagamento;
     
     let dataMatch = true;
     if (filtrosLocais.data_inicio) {
@@ -216,7 +218,7 @@ export default function Servicos() {
       dataMatch = dataMatch && new Date(s.data_fim) <= new Date(filtrosLocais.data_fim);
     }
     
-    return clienteMatch && maquinaMatch && statusCobrancaMatch && statusMatch && dataMatch;
+    return clienteMatch && maquinaMatch && statusCobrancaMatch && statusMatch && formaPagamentoMatch && dataMatch;
   });
 
   // Função para aplicar ordenação automática

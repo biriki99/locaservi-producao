@@ -54,6 +54,9 @@ const Relatorios = () => {
       if (filtrosServicos.status_cobranca && filtrosServicos.status_cobranca !== 'all') {
         servicosFiltrados = servicosFiltrados.filter(s => s.status_cobranca === filtrosServicos.status_cobranca);
       }
+      if (filtrosServicos.forma_pagamento && filtrosServicos.forma_pagamento !== 'all') {
+        servicosFiltrados = servicosFiltrados.filter(s => s.forma_pagamento === filtrosServicos.forma_pagamento);
+      }
       if (filtrosServicos.data_inicio) {
         servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_inicio) >= new Date(filtrosServicos.data_inicio!));
       }
