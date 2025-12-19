@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useData } from "@/contexts/DataContext";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { FiltrosGlobais } from "@/components/dashboard/FiltrosGlobais";
@@ -37,6 +38,26 @@ const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set
 
 export default function Dashboard() {
   const { servicos, categorias, filtros } = useData();
+  const [categoriasVisiveis, setCategoriasVisiveis] = useState<Set<string>>(new Set());
+
+  // Inicializar com todas as categorias visíveis
+  useEffect(() => {
+    if (categorias.length > 0) {
+      setCategoriasVisiveis(new Set(categorias.map(c => c.nome_maquina)));
+    }
+  }, [categorias]);
+
+  const toggleCategoria = (categoria: string) => {
+    setCategoriasVisiveis(prev => {
+      const novo = new Set(prev);
+      if (novo.has(categoria)) {
+        novo.delete(categoria);
+      } else {
+        novo.add(categoria);
+      }
+      return novo;
+    });
+  };
 
   // Filtrar serviços
   const servicosFiltrados = servicos.filter(s => {
@@ -354,7 +375,19 @@ export default function Dashboard() {
                 formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 position={{ y: 0 }}
               />
-              <Legend wrapperStyle={{ paddingTop: "20px" }} />
+              <Legend 
+                wrapperStyle={{ paddingTop: "20px" }} 
+                onClick={(e) => toggleCategoria(e.value as string)}
+                formatter={(value: string) => (
+                  <span style={{ 
+                    color: categoriasVisiveis.has(value) ? 'inherit' : 'hsl(var(--muted-foreground))',
+                    textDecoration: categoriasVisiveis.has(value) ? 'none' : 'line-through',
+                    cursor: 'pointer'
+                  }}>
+                    {value}
+                  </span>
+                )}
+              />
               {categorias.map((cat, index) => (
                 <Line
                   key={cat.id}
@@ -363,6 +396,7 @@ export default function Dashboard() {
                   stroke={COLORS[index % COLORS.length]}
                   strokeWidth={2}
                   name={cat.nome_maquina}
+                  hide={!categoriasVisiveis.has(cat.nome_maquina)}
                 />
               ))}
             </LineChart>
