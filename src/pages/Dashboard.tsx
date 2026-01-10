@@ -59,11 +59,11 @@ export default function Dashboard() {
     });
   };
 
-  // Filtrar serviços
+  // Filtrar serviços (usa data_fim para KPIs e gráficos de totais)
   const servicosFiltrados = servicos.filter(s => {
-    const dataInicio = new Date(s.data_inicio);
-    const mesServico = String(dataInicio.getMonth() + 1).padStart(2, '0');
-    const anoServico = String(dataInicio.getFullYear());
+    const dataFim = new Date(s.data_fim);
+    const mesServico = String(dataFim.getMonth() + 1).padStart(2, '0');
+    const anoServico = String(dataFim.getFullYear());
     
     const mesMatch = filtros.mes === "all" || mesServico === filtros.mes;
     const anoMatch = filtros.ano === "all" || anoServico === filtros.ano;
