@@ -42,6 +42,7 @@ export interface Servico {
   data_fim: string;
   observacoes: string;
   created_at: string;
+  nfe_emitido: boolean;
 }
 
 export interface Agendamento {

@@ -25,6 +25,7 @@ import { Plus, Grid, List, Eye, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Servico, Cliente } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FiltrosServicos } from "@/components/servicos/FiltrosServicos";
 import { ServicoCard } from "@/components/servicos/ServicoCard";
 import { format, parseISO } from "date-fns";
@@ -99,6 +100,7 @@ export default function Servicos() {
       forma_pagamento: "a_receber",
       data_inicio: dataAtual,
       data_fim: dataAtual,
+      nfe_emitido: false,
     });
     
     setIsDialogOpen(true);
@@ -177,7 +179,8 @@ export default function Servicos() {
         forma_pagamento: result.data.forma_pagamento,
         data_inicio: result.data.data_inicio,
         data_fim: result.data.data_fim,
-        observacoes: result.data.observacoes || ""
+        observacoes: result.data.observacoes || "",
+        nfe_emitido: formData.nfe_emitido || false
       });
     }
 
@@ -554,6 +557,15 @@ export default function Servicos() {
               </div>
             </div>
 
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox
+                id="nfe_emitido"
+                checked={formData.nfe_emitido || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, nfe_emitido: !!checked })}
+              />
+              <Label htmlFor="nfe_emitido" className="cursor-pointer">Emitido NF-e</Label>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="data_inicio">Data Início (Padrão: Hoje) *</Label>
@@ -665,6 +677,17 @@ export default function Servicos() {
                 <div>
                   <Label className="text-sm font-semibold text-muted-foreground">Status Cobrança</Label>
                   <div className="mt-1">{getCobrancaBadge(viewingServico.status_cobranca)}</div>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-semibold text-muted-foreground">NF-e Emitida</Label>
+                <div className="mt-1">
+                  {viewingServico.nfe_emitido ? (
+                    <Badge className="bg-success text-success-foreground">Sim</Badge>
+                  ) : (
+                    <Badge variant="secondary">Não</Badge>
+                  )}
                 </div>
               </div>
 

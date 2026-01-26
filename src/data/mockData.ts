@@ -187,7 +187,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-09-01",
     data_fim: "2024-09-05",
     observacoes: "Cliente satisfeito - Renovou contrato",
-    created_at: "2024-08-28T09:00:00Z"
+    created_at: "2024-08-28T09:00:00Z",
+    nfe_emitido: true
   },
   {
     id: "svc-2",
@@ -203,7 +204,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-10-15",
     data_fim: "2024-10-20",
     observacoes: "Aguardando confirmação de data",
-    created_at: "2024-10-10T14:30:00Z"
+    created_at: "2024-10-10T14:30:00Z",
+    nfe_emitido: false
   },
   {
     id: "svc-3",
@@ -219,7 +221,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-09-20",
     data_fim: "2024-09-21",
     observacoes: "Entrega e retirada noturna",
-    created_at: "2024-09-15T11:20:00Z"
+    created_at: "2024-09-15T11:20:00Z",
+    nfe_emitido: true
   },
   {
     id: "svc-4",
@@ -235,7 +238,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-10-01",
     data_fim: "2024-10-31",
     observacoes: "Contrato mensal renovável",
-    created_at: "2024-09-25T08:45:00Z"
+    created_at: "2024-09-25T08:45:00Z",
+    nfe_emitido: false
   },
   {
     id: "svc-5",
@@ -251,7 +255,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-09-10",
     data_fim: "2024-09-13",
     observacoes: "Pagamento na retirada",
-    created_at: "2024-09-08T13:10:00Z"
+    created_at: "2024-09-08T13:10:00Z",
+    nfe_emitido: false
   },
   {
     id: "svc-6",
@@ -267,7 +272,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-08-15",
     data_fim: "2024-08-22",
     observacoes: "Empresa parceira - Desconto aplicado",
-    created_at: "2024-08-10T10:00:00Z"
+    created_at: "2024-08-10T10:00:00Z",
+    nfe_emitido: true
   },
   {
     id: "svc-7",
@@ -283,7 +289,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-09-05",
     data_fim: "2024-09-08",
     observacoes: "Equipamento devolvido em perfeito estado",
-    created_at: "2024-09-03T16:30:00Z"
+    created_at: "2024-09-03T16:30:00Z",
+    nfe_emitido: true
   },
   {
     id: "svc-8",
@@ -299,7 +306,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-10-18",
     data_fim: "2024-10-19",
     observacoes: "Cliente MEI - Parcelamento 2x",
-    created_at: "2024-10-14T14:20:00Z"
+    created_at: "2024-10-14T14:20:00Z",
+    nfe_emitido: false
   },
   {
     id: "svc-9",
@@ -315,7 +323,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-09-25",
     data_fim: "2024-09-26",
     observacoes: "Serviço rápido - 1 dia útil",
-    created_at: "2024-09-24T09:30:00Z"
+    created_at: "2024-09-24T09:30:00Z",
+    nfe_emitido: false
   },
   {
     id: "svc-10",
@@ -331,7 +340,8 @@ export const mockServicos: Servico[] = [
     data_inicio: "2024-09-28",
     data_fim: "2024-10-05",
     observacoes: "Cliente pontual - Sem pendências",
-    created_at: "2024-09-26T11:00:00Z"
+    created_at: "2024-09-26T11:00:00Z",
+    nfe_emitido: true
   }
 ];
 
