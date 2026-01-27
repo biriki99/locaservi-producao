@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import { FiltrosServicos, CampoServico } from "@/types/relatorios";
 import { Cliente, Categoria } from "@/types";
 
@@ -160,26 +160,21 @@ export const FiltrosServicosComponent = ({ filtros, onChange, clientes, categori
       </div>
 
       {/* Filtro NF-e */}
-      <div className="space-y-3 pt-2 border-t">
-        <Label className="text-base font-semibold">Filtrar por NF-e</Label>
-        <RadioGroup 
-          value={filtros.filtro_nfe || 'all'} 
+      <div className="space-y-2">
+        <Label>Filtrar por NF-e</Label>
+        <Select
+          value={filtros.filtro_nfe || "all"}
           onValueChange={(value) => onChange({ ...filtros, filtro_nfe: value as 'all' | 'com_nfe' | 'sem_nfe' })}
-          className="space-y-2"
         >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="all" id="nfe_all" />
-            <Label htmlFor="nfe_all" className="cursor-pointer">Todos (com e sem NF-e)</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="com_nfe" id="nfe_com" />
-            <Label htmlFor="nfe_com" className="cursor-pointer">Somente com NF-e emitida</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="sem_nfe" id="nfe_sem" />
-            <Label htmlFor="nfe_sem" className="cursor-pointer">Somente sem NF-e</Label>
-          </div>
-        </RadioGroup>
+          <SelectTrigger>
+            <SelectValue placeholder="Todos (com e sem NF-e)" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos (com e sem NF-e)</SelectItem>
+            <SelectItem value="com_nfe">Somente com NF-e emitida</SelectItem>
+            <SelectItem value="sem_nfe">Somente sem NF-e</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Campos a Exibir */}
