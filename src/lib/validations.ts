@@ -92,6 +92,7 @@ export const servicoSchema = z.object({
     .max(1000, "Observações devem ter no máximo 1000 caracteres")
     .optional()
     .or(z.literal("")),
+  nfe_emitido: z.boolean().default(false),
 }).refine((data) => {
   // Validate that data_fim is not before data_inicio
   if (data.data_inicio && data.data_fim) {
