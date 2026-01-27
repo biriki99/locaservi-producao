@@ -144,6 +144,7 @@ export default function Servicos() {
       status: formData.status || "pendente",
       status_cobranca: formData.status_cobranca || "a_receber",
       forma_pagamento: formData.forma_pagamento || "a_receber",
+      nfe_emitido: !!formData.nfe_emitido,
     };
 
     // Validate form data with zod
@@ -163,9 +164,10 @@ export default function Servicos() {
     }
 
     if (editingServico) {
-      updateServico(editingServico.id, {
+      await updateServico(editingServico.id, {
         ...result.data,
-        titulo_servico: titulo || result.data.titulo_servico
+        titulo_servico: titulo || result.data.titulo_servico,
+        nfe_emitido: result.data.nfe_emitido
       });
     } else {
       await addServico({
@@ -180,7 +182,7 @@ export default function Servicos() {
         data_inicio: result.data.data_inicio,
         data_fim: result.data.data_fim,
         observacoes: result.data.observacoes || "",
-        nfe_emitido: formData.nfe_emitido || false
+        nfe_emitido: result.data.nfe_emitido
       });
     }
 
