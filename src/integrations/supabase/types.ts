@@ -152,6 +152,7 @@ export type Database = {
           forma_pagamento: string
           id: string
           maquina_id: string
+          nfe_emitido: boolean
           observacoes: string | null
           status: string
           status_cobranca: string
@@ -168,6 +169,7 @@ export type Database = {
           forma_pagamento?: string
           id?: string
           maquina_id: string
+          nfe_emitido?: boolean
           observacoes?: string | null
           status?: string
           status_cobranca?: string
@@ -184,6 +186,7 @@ export type Database = {
           forma_pagamento?: string
           id?: string
           maquina_id?: string
+          nfe_emitido?: boolean
           observacoes?: string | null
           status?: string
           status_cobranca?: string

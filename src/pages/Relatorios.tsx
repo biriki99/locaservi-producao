@@ -28,7 +28,8 @@ const Relatorios = () => {
   const [filtrosServicos, setFiltrosServicos] = useState<FiltrosServicos>({
     somar_valores: true,
     exibir_descricao: false,
-    campos_selecionados: ['titulo_servico', 'cliente', 'categoria', 'data_inicio', 'data_fim', 'valor', 'status_cobranca']
+    campos_selecionados: ['titulo_servico', 'cliente', 'categoria', 'data_inicio', 'data_fim', 'valor', 'status_cobranca'],
+    filtro_nfe: 'all'
   });
 
   const [filtrosClientes, setFiltrosClientes] = useState<FiltrosClientes>({
@@ -64,6 +65,13 @@ const Relatorios = () => {
         servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosServicos.data_fim!));
       }
 
+      // Filtro NF-e
+      if (filtrosServicos.filtro_nfe === 'com_nfe') {
+        servicosFiltrados = servicosFiltrados.filter(s => s.nfe_emitido === true);
+      } else if (filtrosServicos.filtro_nfe === 'sem_nfe') {
+        servicosFiltrados = servicosFiltrados.filter(s => s.nfe_emitido === false);
+      }
+
       // Mapear para o formato de exibição
       return servicosFiltrados.map(s => {
         const cliente = clientes.find(c => c.id === s.cliente_id);
@@ -82,6 +90,7 @@ const Relatorios = () => {
         if (filtrosServicos.campos_selecionados.includes('forma_pagamento')) resultado.forma_pagamento = s.forma_pagamento;
         if (filtrosServicos.campos_selecionados.includes('descricao') && filtrosServicos.exibir_descricao) resultado.descricao = s.descricao;
         if (filtrosServicos.campos_selecionados.includes('observacoes')) resultado.observacoes = s.observacoes;
+        if (filtrosServicos.campos_selecionados.includes('nfe_emitido')) resultado.nfe_emitido = s.nfe_emitido ? 'Sim' : 'Não';
 
         return resultado;
       });
@@ -166,7 +175,8 @@ const Relatorios = () => {
         status_cobranca: 'Status Cobrança',
         forma_pagamento: 'Forma Pagamento',
         descricao: 'Descrição',
-        observacoes: 'Observações'
+        observacoes: 'Observações',
+        nfe_emitido: 'NF-e Emitida'
       };
       return { colunas: cols, labelsColunas: labels };
     }
@@ -261,7 +271,8 @@ const Relatorios = () => {
       setFiltrosServicos({
         somar_valores: true,
         exibir_descricao: false,
-        campos_selecionados: ['titulo_servico', 'cliente', 'categoria', 'data_inicio', 'data_fim', 'valor', 'status_cobranca']
+        campos_selecionados: ['titulo_servico', 'cliente', 'categoria', 'data_inicio', 'data_fim', 'valor', 'status_cobranca'],
+        filtro_nfe: 'all'
       });
     }
     if (tipoRelatorio === 'clientes') {

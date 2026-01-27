@@ -10,6 +10,7 @@ export interface FiltrosServicos {
   somar_valores: boolean;
   exibir_descricao: boolean;
   campos_selecionados: CampoServico[];
+  filtro_nfe?: 'all' | 'com_nfe' | 'sem_nfe';
 }
 
 export type CampoServico = 
@@ -23,7 +24,8 @@ export type CampoServico =
   | 'status_cobranca'
   | 'forma_pagamento'
   | 'descricao'
-  | 'observacoes';
+  | 'observacoes'
+  | 'nfe_emitido';
 
 export interface FiltrosClientes {
   nome_cliente?: string;

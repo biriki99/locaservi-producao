@@ -2,6 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+
 import { FiltrosServicos, CampoServico } from "@/types/relatorios";
 import { Cliente, Categoria } from "@/types";
 
@@ -23,7 +24,8 @@ const CAMPOS_DISPONIVEIS: { value: CampoServico; label: string }[] = [
   { value: 'status_cobranca', label: 'Status Cobrança' },
   { value: 'forma_pagamento', label: 'Forma Pagamento' },
   { value: 'descricao', label: 'Descrição' },
-  { value: 'observacoes', label: 'Observações' }
+  { value: 'observacoes', label: 'Observações' },
+  { value: 'nfe_emitido', label: 'NF-e Emitida' }
 ];
 
 export const FiltrosServicosComponent = ({ filtros, onChange, clientes, categorias }: Props) => {
@@ -155,6 +157,24 @@ export const FiltrosServicosComponent = ({ filtros, onChange, clientes, categori
           />
           <Label htmlFor="descricao" className="cursor-pointer">Exibir campo de Descrição</Label>
         </div>
+      </div>
+
+      {/* Filtro NF-e */}
+      <div className="space-y-2">
+        <Label>Filtrar por NF-e</Label>
+        <Select
+          value={filtros.filtro_nfe || "all"}
+          onValueChange={(value) => onChange({ ...filtros, filtro_nfe: value as 'all' | 'com_nfe' | 'sem_nfe' })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Todos (com e sem NF-e)" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos (com e sem NF-e)</SelectItem>
+            <SelectItem value="com_nfe">Somente com NF-e emitida</SelectItem>
+            <SelectItem value="sem_nfe">Somente sem NF-e</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Campos a Exibir */}
