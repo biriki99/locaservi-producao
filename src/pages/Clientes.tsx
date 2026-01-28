@@ -19,6 +19,7 @@ import { Cliente } from "@/types";
 import { ClienteCard } from "@/components/clientes/ClienteCard";
 import { clienteSchema } from "@/lib/validations";
 import { format } from "date-fns";
+import { formatarTelefone, limparTelefone } from "@/lib/utils";
 
 export default function Clientes() {
   const { clientes, addCliente, updateCliente, deleteCliente } = useData();
@@ -90,8 +91,25 @@ export default function Clientes() {
       return;
     }
 
+    // Verificar duplicidade de telefone
+    const telefoneDigitos = limparTelefone(formData.telefone || "");
+    
+    if (telefoneDigitos) {
+      const clienteExistente = clientes.find(c => {
+        const telExistente = limparTelefone(c.telefone || "");
+        // Ignora o próprio cliente se estiver editando
+        if (editingCliente && c.id === editingCliente.id) return false;
+        return telExistente === telefoneDigitos && telExistente !== "";
+      });
+      
+      if (clienteExistente) {
+        toast.error(`Já existe um cliente com este telefone: ${clienteExistente.nome}`);
+        return;
+      }
+    }
+
     if (editingCliente) {
-      updateCliente(editingCliente.id, result.data);
+      await updateCliente(editingCliente.id, result.data);
     } else {
       await addCliente({
         nome: result.data.nome,
@@ -235,9 +253,9 @@ export default function Clientes() {
                 <Label htmlFor="telefone">Telefone</Label>
                 <Input
                   id="telefone"
-                  placeholder="+55 11 99999-9999"
+                  placeholder="(11) 99999-9999"
                   value={formData.telefone || ""}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, telefone: formatarTelefone(e.target.value) })}
                 />
               </div>
             </div>
