@@ -1,152 +1,123 @@
 
 
-## Plano: Campo Telefone Único com Máscara de Formatação
+## Plano: Corrigir Ordenação de Serviços
 
-### Resumo da Solicitação
-1. O campo "Telefone" deve ser **único** (não pode haver dois clientes com o mesmo número)
-2. O campo continua sendo **não obrigatório** (pode ficar vazio)
-3. Ao tentar salvar um telefone que já existe, mostrar um **alerta com o nome do cliente** que já possui esse número
-4. O campo deve seguir o **formato visual (XX) XXXXX-XXXX** conforme a imagem
+### Problema Identificado
+
+Os valores do dropdown "Ordenar por" **não correspondem** aos valores esperados pela função de ordenação. Por isso a mensagem de sucesso aparece, mas a lista não é reordenada.
+
+**Valores no dropdown (`FiltrosServicos.tsx`):**
+- `data_asc`, `data_desc`
+- `valor_desc`, `valor_asc`
+- `titulo_asc`, `titulo_desc`
+- `categoria_asc`, `categoria_desc`
+- `status_asc`, `status_desc`
+
+**Valores esperados pela função (`Servicos.tsx`):**
+- `data_mais_antigo`, `data_mais_recente`
+- `valor_maior`, `valor_menor`
+- `titulo_az`, `titulo_za`
+- `categoria_az`, `categoria_za`
+- `status_crescente`, `status_decrescente`
+
+---
+
+### Solução
+
+Atualizar a função `aplicarOrdenacaoAutomatica` em `src/pages/Servicos.tsx` para usar os mesmos valores que o dropdown envia.
 
 ---
 
 ### Alterações Necessárias
 
-#### 1. Criar função utilitária para máscara de telefone
+**Arquivo:** `src/pages/Servicos.tsx` (função `aplicarOrdenacaoAutomatica`, linhas 230-283)
 
-**Arquivo:** `src/lib/utils.ts`
+Substituir os case statements para usar os novos valores:
 
-Adicionar funções para:
-- `formatarTelefone(valor)`: Aplica a máscara `(XX) XXXXX-XXXX` enquanto o usuário digita
-- `limparTelefone(valor)`: Remove a formatação para comparação (apenas dígitos)
-
-```typescript
-// Formata telefone para (XX) XXXXX-XXXX
-export function formatarTelefone(valor: string): string {
-  const numeros = valor.replace(/\D/g, '').slice(0, 11);
-  if (numeros.length <= 2) return numeros.length ? `(${numeros}` : '';
-  if (numeros.length <= 7) return `(${numeros.slice(0,2)}) ${numeros.slice(2)}`;
-  return `(${numeros.slice(0,2)}) ${numeros.slice(2,7)}-${numeros.slice(7)}`;
-}
-
-// Remove formatação do telefone (só dígitos)
-export function limparTelefone(valor: string): string {
-  return valor.replace(/\D/g, '');
-}
-```
+| Valor Atual (não funciona) | Novo Valor (correto) |
+|----------------------------|----------------------|
+| `data_mais_antigo` | `data_asc` |
+| `data_mais_recente` | `data_desc` |
+| `valor_maior` | `valor_desc` |
+| `valor_menor` | `valor_asc` |
+| `titulo_az` | `titulo_asc` |
+| `titulo_za` | `titulo_desc` |
+| `categoria_az` | `categoria_asc` |
+| `categoria_za` | `categoria_desc` |
+| `status_crescente` | `status_asc` |
+| `status_decrescente` | `status_desc` |
 
 ---
 
-#### 2. Atualizar página de Clientes
-
-**Arquivo:** `src/pages/Clientes.tsx`
-
-**Mudanças:**
-
-1. **Importar** as novas funções `formatarTelefone` e `limparTelefone`
-
-2. **Aplicar máscara no input** de telefone:
-   - Quando o usuário digitar, formatar automaticamente
-   - Placeholder atualizado para `(11) 99999-9999`
-
-3. **Verificar duplicidade antes de salvar**:
-   - Antes de `addCliente` ou `updateCliente`
-   - Se o telefone não estiver vazio:
-     - Comparar com outros clientes (usando apenas dígitos)
-     - Se encontrar duplicata (e não for o próprio cliente em edição):
-       - Mostrar `toast.error` com mensagem: "Já existe um cliente com este telefone: [Nome do Cliente]"
-       - Não permitir salvar
-
-**Lógica de verificação:**
+### Código Corrigido
 
 ```typescript
-// Dentro do handleSubmit, antes de salvar:
-const telefoneDigitos = limparTelefone(formData.telefone || "");
-
-if (telefoneDigitos) {
-  const clienteExistente = clientes.find(c => {
-    const telExistente = limparTelefone(c.telefone || "");
-    // Ignora o próprio cliente se estiver editando
-    if (editingCliente && c.id === editingCliente.id) return false;
-    return telExistente === telefoneDigitos && telExistente !== "";
-  });
+const aplicarOrdenacaoAutomatica = (servicosArray: Servico[], tipoOrdenacao: string) => {
+  if (tipoOrdenacao === "padrao") return servicosArray;
   
-  if (clienteExistente) {
-    toast.error(`Já existe um cliente com este telefone: ${clienteExistente.nome}`);
-    return;
+  const sortedArray = [...servicosArray];
+  
+  switch (tipoOrdenacao) {
+    case "data_asc":
+      return sortedArray.sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime());
+    
+    case "data_desc":
+      return sortedArray.sort((a, b) => new Date(b.data_inicio).getTime() - new Date(a.data_inicio).getTime());
+    
+    case "valor_desc":
+      return sortedArray.sort((a, b) => b.valor - a.valor);
+    
+    case "valor_asc":
+      return sortedArray.sort((a, b) => a.valor - b.valor);
+    
+    case "titulo_asc":
+      return sortedArray.sort((a, b) => a.titulo_servico.localeCompare(b.titulo_servico));
+    
+    case "titulo_desc":
+      return sortedArray.sort((a, b) => b.titulo_servico.localeCompare(a.titulo_servico));
+    
+    case "categoria_asc":
+      return sortedArray.sort((a, b) => {
+        const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
+        const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
+        return catA.localeCompare(catB);
+      });
+    
+    case "categoria_desc":
+      return sortedArray.sort((a, b) => {
+        const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
+        const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
+        return catB.localeCompare(catA);
+      });
+    
+    case "status_asc":
+      return sortedArray.sort((a, b) => a.status.localeCompare(b.status));
+    
+    case "status_desc":
+      return sortedArray.sort((a, b) => b.status.localeCompare(a.status));
+    
+    default:
+      return servicosArray;
   }
-}
+};
 ```
 
 ---
 
-#### 3. Atualizar validação Zod (opcional, manter compatibilidade)
-
-**Arquivo:** `src/lib/validations.ts`
-
-O schema atual já permite telefone opcional. Podemos adicionar validação de formato se desejado:
-
-```typescript
-telefone: z
-  .string()
-  .trim()
-  .max(20, "Telefone deve ter no máximo 20 caracteres")
-  .regex(/^$|^\(\d{2}\) \d{5}-\d{4}$/, "Formato inválido. Use (XX) XXXXX-XXXX")
-  .optional()
-  .or(z.literal("")),
-```
-
-Porém, como os cadastros existentes não seguem o formato, **recomendo não aplicar regex na validação** para evitar bloquear edições de registros antigos. A máscara será aplicada apenas na digitação.
-
----
-
-### Fluxo de Funcionamento
-
-```text
-Usuário digita telefone
-        │
-        ▼
-┌─────────────────────────┐
-│ Máscara aplica formato  │
-│ (XX) XXXXX-XXXX         │
-└────────────┬────────────┘
-             │
-             ▼
-    Clica em "Salvar"
-             │
-             ▼
-┌─────────────────────────┐
-│ Telefone está vazio?    │
-└────────────┬────────────┘
-      │ Não        │ Sim
-      ▼            ▼
-┌─────────────────┐    Continua salvando
-│ Busca duplicata │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │ Existe? │
-    └────┬────┘
-    Sim  │  Não
-    ▼    ▼
-Toast    Salva
-erro     cliente
-```
-
----
-
-### Arquivos que serão alterados
+### Arquivos a Alterar
 
 | Arquivo | Alteração |
 |---------|-----------|
-| `src/lib/utils.ts` | Adicionar funções `formatarTelefone` e `limparTelefone` |
-| `src/pages/Clientes.tsx` | Aplicar máscara no input + verificar duplicidade antes de salvar |
+| `src/pages/Servicos.tsx` | Corrigir valores dos cases na função `aplicarOrdenacaoAutomatica` (linhas 235-279) |
 
 ---
 
-### Observações Importantes
+### Validação
 
-- **Cadastros existentes**: Não serão alterados automaticamente. O novo formato só será aplicado ao editar ou criar novos clientes
-- **Comparação inteligente**: A verificação de duplicidade usa apenas os dígitos, então `(11) 99999-9999` será considerado igual a `11999999999` ou `11 99999-9999`
-- **Telefone vazio**: Se o campo estiver vazio, não será feita verificação de duplicidade (pode ter vários clientes sem telefone)
+Após a correção:
+1. Ir em Serviços
+2. Selecionar qualquer opção de ordenação no dropdown "Ordenar por"
+3. A lista de serviços deve ser reordenada imediatamente conforme a opção selecionada
+4. A badge "Ordenação automática ativa" deve aparecer
+5. O botão "Restaurar ordem" deve voltar à ordem padrão
 
