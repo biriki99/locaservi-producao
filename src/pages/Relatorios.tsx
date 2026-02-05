@@ -59,7 +59,7 @@ const Relatorios = () => {
         servicosFiltrados = servicosFiltrados.filter(s => s.forma_pagamento === filtrosServicos.forma_pagamento);
       }
       if (filtrosServicos.data_inicio) {
-        servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_inicio) >= new Date(filtrosServicos.data_inicio!));
+        servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) >= new Date(filtrosServicos.data_inicio!));
       }
       if (filtrosServicos.data_fim) {
         servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosServicos.data_fim!));
@@ -135,7 +135,7 @@ const Relatorios = () => {
 
       // Aplicar filtros
       if (filtrosCategorias.data_inicio) {
-        servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_inicio) >= new Date(filtrosCategorias.data_inicio!));
+        servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) >= new Date(filtrosCategorias.data_inicio!));
       }
       if (filtrosCategorias.data_fim) {
         servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosCategorias.data_fim!));
