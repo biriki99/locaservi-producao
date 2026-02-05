@@ -233,49 +233,43 @@ export default function Servicos() {
     const sortedArray = [...servicosArray];
     
     switch (tipoOrdenacao) {
-      case "data_mais_antigo":
+      case "data_asc":
         return sortedArray.sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime());
       
-      case "data_mais_recente":
+      case "data_desc":
         return sortedArray.sort((a, b) => new Date(b.data_inicio).getTime() - new Date(a.data_inicio).getTime());
       
-      case "valor_maior":
+      case "valor_desc":
         return sortedArray.sort((a, b) => b.valor - a.valor);
       
-      case "valor_menor":
+      case "valor_asc":
         return sortedArray.sort((a, b) => a.valor - b.valor);
       
-      case "titulo_az":
+      case "titulo_asc":
         return sortedArray.sort((a, b) => a.titulo_servico.localeCompare(b.titulo_servico));
       
-      case "titulo_za":
+      case "titulo_desc":
         return sortedArray.sort((a, b) => b.titulo_servico.localeCompare(a.titulo_servico));
       
-      case "categoria_az":
+      case "categoria_asc":
         return sortedArray.sort((a, b) => {
           const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
           const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
           return catA.localeCompare(catB);
         });
       
-      case "categoria_za":
+      case "categoria_desc":
         return sortedArray.sort((a, b) => {
           const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
           const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
           return catB.localeCompare(catA);
         });
       
-      case "status_crescente":
+      case "status_asc":
         return sortedArray.sort((a, b) => a.status.localeCompare(b.status));
       
-      case "status_decrescente":
+      case "status_desc":
         return sortedArray.sort((a, b) => b.status.localeCompare(a.status));
-      
-      case "cobranca_pago":
-        return sortedArray.sort((a, b) => (a.status_cobranca === "pago" ? -1 : 1));
-      
-      case "cobranca_receber":
-        return sortedArray.sort((a, b) => (a.status_cobranca === "a_receber" ? -1 : 1));
       
       default:
         return servicosArray;
