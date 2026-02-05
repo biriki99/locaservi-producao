@@ -1,152 +1,93 @@
 
 
-## Plano: Campo Telefone Único com Máscara de Formatação
+## Plano: Filtros de Data do Relatório Baseados na Data Final do Serviço
 
-### Resumo da Solicitação
-1. O campo "Telefone" deve ser **único** (não pode haver dois clientes com o mesmo número)
-2. O campo continua sendo **não obrigatório** (pode ficar vazio)
-3. Ao tentar salvar um telefone que já existe, mostrar um **alerta com o nome do cliente** que já possui esse número
-4. O campo deve seguir o **formato visual (XX) XXXXX-XXXX** conforme a imagem
+### Problema Identificado
+
+Atualmente, os filtros de data nos relatórios funcionam assim:
+- **Filtro "Data Início"**: filtra serviços onde `s.data_inicio >= filtro.data_inicio`
+- **Filtro "Data Fim"**: filtra serviços onde `s.data_fim <= filtro.data_fim`
+
+**O que você precisa**: Ambos os filtros devem usar a `data_fim` do serviço como referência.
+
+Exemplo prático:
+- Período do relatório: 01/01/2026 até 31/01/2026
+- Serviço 1: início 20/12/2025 → fim **15/01/2026** → **Deve aparecer** ✓
+- Serviço 2: início 05/01/2025 → fim **20/01/2026** → **Deve aparecer** ✓
+- Serviço 3: início 20/01/2025 → fim **01/02/2026** → **Não deve aparecer** ✗
 
 ---
 
 ### Alterações Necessárias
 
-#### 1. Criar função utilitária para máscara de telefone
+#### Arquivo: `src/pages/Relatorios.tsx`
 
-**Arquivo:** `src/lib/utils.ts`
+**1. Relatório de Serviços (linhas 61-66)**
 
-Adicionar funções para:
-- `formatarTelefone(valor)`: Aplica a máscara `(XX) XXXXX-XXXX` enquanto o usuário digita
-- `limparTelefone(valor)`: Remove a formatação para comparação (apenas dígitos)
-
+**Antes:**
 ```typescript
-// Formata telefone para (XX) XXXXX-XXXX
-export function formatarTelefone(valor: string): string {
-  const numeros = valor.replace(/\D/g, '').slice(0, 11);
-  if (numeros.length <= 2) return numeros.length ? `(${numeros}` : '';
-  if (numeros.length <= 7) return `(${numeros.slice(0,2)}) ${numeros.slice(2)}`;
-  return `(${numeros.slice(0,2)}) ${numeros.slice(2,7)}-${numeros.slice(7)}`;
+if (filtrosServicos.data_inicio) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_inicio) >= new Date(filtrosServicos.data_inicio!));
 }
-
-// Remove formatação do telefone (só dígitos)
-export function limparTelefone(valor: string): string {
-  return valor.replace(/\D/g, '');
+if (filtrosServicos.data_fim) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosServicos.data_fim!));
 }
 ```
 
----
-
-#### 2. Atualizar página de Clientes
-
-**Arquivo:** `src/pages/Clientes.tsx`
-
-**Mudanças:**
-
-1. **Importar** as novas funções `formatarTelefone` e `limparTelefone`
-
-2. **Aplicar máscara no input** de telefone:
-   - Quando o usuário digitar, formatar automaticamente
-   - Placeholder atualizado para `(11) 99999-9999`
-
-3. **Verificar duplicidade antes de salvar**:
-   - Antes de `addCliente` ou `updateCliente`
-   - Se o telefone não estiver vazio:
-     - Comparar com outros clientes (usando apenas dígitos)
-     - Se encontrar duplicata (e não for o próprio cliente em edição):
-       - Mostrar `toast.error` com mensagem: "Já existe um cliente com este telefone: [Nome do Cliente]"
-       - Não permitir salvar
-
-**Lógica de verificação:**
-
+**Depois:**
 ```typescript
-// Dentro do handleSubmit, antes de salvar:
-const telefoneDigitos = limparTelefone(formData.telefone || "");
+if (filtrosServicos.data_inicio) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) >= new Date(filtrosServicos.data_inicio!));
+}
+if (filtrosServicos.data_fim) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosServicos.data_fim!));
+}
+```
 
-if (telefoneDigitos) {
-  const clienteExistente = clientes.find(c => {
-    const telExistente = limparTelefone(c.telefone || "");
-    // Ignora o próprio cliente se estiver editando
-    if (editingCliente && c.id === editingCliente.id) return false;
-    return telExistente === telefoneDigitos && telExistente !== "";
-  });
-  
-  if (clienteExistente) {
-    toast.error(`Já existe um cliente com este telefone: ${clienteExistente.nome}`);
-    return;
-  }
+**2. Relatório de Categorias (linhas 137-142)**
+
+**Antes:**
+```typescript
+if (filtrosCategorias.data_inicio) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_inicio) >= new Date(filtrosCategorias.data_inicio!));
+}
+if (filtrosCategorias.data_fim) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosCategorias.data_fim!));
+}
+```
+
+**Depois:**
+```typescript
+if (filtrosCategorias.data_inicio) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) >= new Date(filtrosCategorias.data_inicio!));
+}
+if (filtrosCategorias.data_fim) {
+  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosCategorias.data_fim!));
 }
 ```
 
 ---
 
-#### 3. Atualizar validação Zod (opcional, manter compatibilidade)
+### Resumo da Lógica
 
-**Arquivo:** `src/lib/validations.ts`
+| Filtro | Campo do Serviço Usado | Operação |
+|--------|------------------------|----------|
+| Data Início (do período) | `s.data_fim` | >= filtro |
+| Data Fim (do período) | `s.data_fim` | <= filtro |
 
-O schema atual já permite telefone opcional. Podemos adicionar validação de formato se desejado:
-
-```typescript
-telefone: z
-  .string()
-  .trim()
-  .max(20, "Telefone deve ter no máximo 20 caracteres")
-  .regex(/^$|^\(\d{2}\) \d{5}-\d{4}$/, "Formato inválido. Use (XX) XXXXX-XXXX")
-  .optional()
-  .or(z.literal("")),
-```
-
-Porém, como os cadastros existentes não seguem o formato, **recomendo não aplicar regex na validação** para evitar bloquear edições de registros antigos. A máscara será aplicada apenas na digitação.
+A data de término do serviço (`data_fim`) é usada como referência para ambos os filtros, garantindo que o serviço seja atribuído ao período em que foi concluído.
 
 ---
 
-### Fluxo de Funcionamento
-
-```text
-Usuário digita telefone
-        │
-        ▼
-┌─────────────────────────┐
-│ Máscara aplica formato  │
-│ (XX) XXXXX-XXXX         │
-└────────────┬────────────┘
-             │
-             ▼
-    Clica em "Salvar"
-             │
-             ▼
-┌─────────────────────────┐
-│ Telefone está vazio?    │
-└────────────┬────────────┘
-      │ Não        │ Sim
-      ▼            ▼
-┌─────────────────┐    Continua salvando
-│ Busca duplicata │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │ Existe? │
-    └────┬────┘
-    Sim  │  Não
-    ▼    ▼
-Toast    Salva
-erro     cliente
-```
-
----
-
-### Arquivos que serão alterados
+### Arquivos Alterados
 
 | Arquivo | Alteração |
 |---------|-----------|
-| `src/lib/utils.ts` | Adicionar funções `formatarTelefone` e `limparTelefone` |
-| `src/pages/Clientes.tsx` | Aplicar máscara no input + verificar duplicidade antes de salvar |
+| `src/pages/Relatorios.tsx` | Mudar lógica de filtro de datas (linhas 61-66 e 137-142) |
 
 ---
 
-### Observações Importantes
+### Consistência com Dashboard
 
-- **Cadastros existentes**: Não serão alterados automaticamente. O novo formato só será aplicado ao editar ou criar novos clientes
-- **Comparação inteligente**: A verificação de duplicidade usa apenas os dígitos, então `(11) 99999-9999` será considerado igual a `11999999999` ou `11 99999-9999`
-- **Telefone vazio**: Se o campo estiver vazio, não será feita verificação de duplicidade (pode ter vários clientes sem telefone)
+Esta alteração segue o mesmo padrão já implementado no Dashboard (conforme memória do projeto), onde os KPIs "Total em Aluguéis", "Total a Receber" e "Faturamento por Categoria" também usam `data_fim` para cálculos periódicos.
 
