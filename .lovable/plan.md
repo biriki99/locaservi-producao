@@ -1,93 +1,123 @@
 
 
-## Plano: Filtros de Data do Relatório Baseados na Data Final do Serviço
+## Plano: Corrigir Ordenação de Serviços
 
 ### Problema Identificado
 
-Atualmente, os filtros de data nos relatórios funcionam assim:
-- **Filtro "Data Início"**: filtra serviços onde `s.data_inicio >= filtro.data_inicio`
-- **Filtro "Data Fim"**: filtra serviços onde `s.data_fim <= filtro.data_fim`
+Os valores do dropdown "Ordenar por" **não correspondem** aos valores esperados pela função de ordenação. Por isso a mensagem de sucesso aparece, mas a lista não é reordenada.
 
-**O que você precisa**: Ambos os filtros devem usar a `data_fim` do serviço como referência.
+**Valores no dropdown (`FiltrosServicos.tsx`):**
+- `data_asc`, `data_desc`
+- `valor_desc`, `valor_asc`
+- `titulo_asc`, `titulo_desc`
+- `categoria_asc`, `categoria_desc`
+- `status_asc`, `status_desc`
 
-Exemplo prático:
-- Período do relatório: 01/01/2026 até 31/01/2026
-- Serviço 1: início 20/12/2025 → fim **15/01/2026** → **Deve aparecer** ✓
-- Serviço 2: início 05/01/2025 → fim **20/01/2026** → **Deve aparecer** ✓
-- Serviço 3: início 20/01/2025 → fim **01/02/2026** → **Não deve aparecer** ✗
+**Valores esperados pela função (`Servicos.tsx`):**
+- `data_mais_antigo`, `data_mais_recente`
+- `valor_maior`, `valor_menor`
+- `titulo_az`, `titulo_za`
+- `categoria_az`, `categoria_za`
+- `status_crescente`, `status_decrescente`
+
+---
+
+### Solução
+
+Atualizar a função `aplicarOrdenacaoAutomatica` em `src/pages/Servicos.tsx` para usar os mesmos valores que o dropdown envia.
 
 ---
 
 ### Alterações Necessárias
 
-#### Arquivo: `src/pages/Relatorios.tsx`
+**Arquivo:** `src/pages/Servicos.tsx` (função `aplicarOrdenacaoAutomatica`, linhas 230-283)
 
-**1. Relatório de Serviços (linhas 61-66)**
+Substituir os case statements para usar os novos valores:
 
-**Antes:**
+| Valor Atual (não funciona) | Novo Valor (correto) |
+|----------------------------|----------------------|
+| `data_mais_antigo` | `data_asc` |
+| `data_mais_recente` | `data_desc` |
+| `valor_maior` | `valor_desc` |
+| `valor_menor` | `valor_asc` |
+| `titulo_az` | `titulo_asc` |
+| `titulo_za` | `titulo_desc` |
+| `categoria_az` | `categoria_asc` |
+| `categoria_za` | `categoria_desc` |
+| `status_crescente` | `status_asc` |
+| `status_decrescente` | `status_desc` |
+
+---
+
+### Código Corrigido
+
 ```typescript
-if (filtrosServicos.data_inicio) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_inicio) >= new Date(filtrosServicos.data_inicio!));
-}
-if (filtrosServicos.data_fim) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosServicos.data_fim!));
-}
-```
-
-**Depois:**
-```typescript
-if (filtrosServicos.data_inicio) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) >= new Date(filtrosServicos.data_inicio!));
-}
-if (filtrosServicos.data_fim) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosServicos.data_fim!));
-}
-```
-
-**2. Relatório de Categorias (linhas 137-142)**
-
-**Antes:**
-```typescript
-if (filtrosCategorias.data_inicio) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_inicio) >= new Date(filtrosCategorias.data_inicio!));
-}
-if (filtrosCategorias.data_fim) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosCategorias.data_fim!));
-}
-```
-
-**Depois:**
-```typescript
-if (filtrosCategorias.data_inicio) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) >= new Date(filtrosCategorias.data_inicio!));
-}
-if (filtrosCategorias.data_fim) {
-  servicosFiltrados = servicosFiltrados.filter(s => new Date(s.data_fim) <= new Date(filtrosCategorias.data_fim!));
-}
+const aplicarOrdenacaoAutomatica = (servicosArray: Servico[], tipoOrdenacao: string) => {
+  if (tipoOrdenacao === "padrao") return servicosArray;
+  
+  const sortedArray = [...servicosArray];
+  
+  switch (tipoOrdenacao) {
+    case "data_asc":
+      return sortedArray.sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime());
+    
+    case "data_desc":
+      return sortedArray.sort((a, b) => new Date(b.data_inicio).getTime() - new Date(a.data_inicio).getTime());
+    
+    case "valor_desc":
+      return sortedArray.sort((a, b) => b.valor - a.valor);
+    
+    case "valor_asc":
+      return sortedArray.sort((a, b) => a.valor - b.valor);
+    
+    case "titulo_asc":
+      return sortedArray.sort((a, b) => a.titulo_servico.localeCompare(b.titulo_servico));
+    
+    case "titulo_desc":
+      return sortedArray.sort((a, b) => b.titulo_servico.localeCompare(a.titulo_servico));
+    
+    case "categoria_asc":
+      return sortedArray.sort((a, b) => {
+        const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
+        const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
+        return catA.localeCompare(catB);
+      });
+    
+    case "categoria_desc":
+      return sortedArray.sort((a, b) => {
+        const catA = categorias.find(c => c.id === a.maquina_id)?.nome_maquina || "";
+        const catB = categorias.find(c => c.id === b.maquina_id)?.nome_maquina || "";
+        return catB.localeCompare(catA);
+      });
+    
+    case "status_asc":
+      return sortedArray.sort((a, b) => a.status.localeCompare(b.status));
+    
+    case "status_desc":
+      return sortedArray.sort((a, b) => b.status.localeCompare(a.status));
+    
+    default:
+      return servicosArray;
+  }
+};
 ```
 
 ---
 
-### Resumo da Lógica
-
-| Filtro | Campo do Serviço Usado | Operação |
-|--------|------------------------|----------|
-| Data Início (do período) | `s.data_fim` | >= filtro |
-| Data Fim (do período) | `s.data_fim` | <= filtro |
-
-A data de término do serviço (`data_fim`) é usada como referência para ambos os filtros, garantindo que o serviço seja atribuído ao período em que foi concluído.
-
----
-
-### Arquivos Alterados
+### Arquivos a Alterar
 
 | Arquivo | Alteração |
 |---------|-----------|
-| `src/pages/Relatorios.tsx` | Mudar lógica de filtro de datas (linhas 61-66 e 137-142) |
+| `src/pages/Servicos.tsx` | Corrigir valores dos cases na função `aplicarOrdenacaoAutomatica` (linhas 235-279) |
 
 ---
 
-### Consistência com Dashboard
+### Validação
 
-Esta alteração segue o mesmo padrão já implementado no Dashboard (conforme memória do projeto), onde os KPIs "Total em Aluguéis", "Total a Receber" e "Faturamento por Categoria" também usam `data_fim` para cálculos periódicos.
+Após a correção:
+1. Ir em Serviços
+2. Selecionar qualquer opção de ordenação no dropdown "Ordenar por"
+3. A lista de serviços deve ser reordenada imediatamente conforme a opção selecionada
+4. A badge "Ordenação automática ativa" deve aparecer
+5. O botão "Restaurar ordem" deve voltar à ordem padrão
 
